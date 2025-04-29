@@ -57,7 +57,6 @@ exports.handleWebhook = (async(req, res) => {
 
     await sendMessage(phone, welcomeMessage);
     await sendMessage(phone, 'Choose option:', ['Register', 'Complain']);
-   // await sendMessage(phone, 'Choose option:', ['Register', 'Complain']);
     return res.sendStatus(200);
   }
   if (text.toLowerCase() === 'register') {
@@ -68,51 +67,7 @@ exports.handleWebhook = (async(req, res) => {
     };
     return res.sendStatus(200);
   }
-  // if (tempComplaints[phone]?.stage === 'awaiting_name' && tempComplaints[phone]?.isRegistering) {
-  //   if (!text || text.length < 2) {
-  //     await sendMessage(phone, 'Please enter a valid name (at least 2 characters)');
-  //     return res.sendStatus(200);
-  //   }
-    
-  //   tempComplaints[phone].name = text;
-  //   tempComplaints[phone].stage = 'awaiting_vehicle';
-  //   await sendMessage(phone, ' Please enter your vehicle No:');
-  //   return res.sendStatus(200);
-  // }
-  // if (tempComplaints[phone]?.stage === 'awaiting_vehicle' && tempComplaints[phone]?.isRegistering) {
-  //   if (!text || text.length < 3) {
-  //     await sendMessage(phone, 'Please enter your vehicle No.');
-  //     return res.sendStatus(200);
-  //   }
-  //   const vehicleExists = await Registration.exists({ 'vehicles.number': text });
-      
-  //   if (vehicleExists) {
-  //     await sendMessage(phone, `❌ Vehicle number ${text} is already registered. Please use a different number.`);
-  //     return res.sendStatus(200);
-  //   }
-  //   const userHasVehicle = await Registration.exists({ 
-  //     phone,
-  //     'vehicles.number': text 
-  //   });
-    
-  //   if (userHasVehicle) {
-  //     await sendMessage(phone, `ℹ️ You've already registered vehicle ${text}.`);
-  //     delete tempComplaints[phone];
-  //     return res.sendStatus(200);
-  //   }
-  //   await Registration.findOneAndUpdate(
-  //     { phone },
-  //     { 
-  //       $set: { name: tempComplaints[phone].name },
-  //       $push: { vehicles: { number: text, complaints: [] } } 
-  //     },
-  //     { upsert: true }
-  //   );
-
-  //   delete tempComplaints[phone];
-  //   await sendMessage(phone, '✅ Registration successful!');
-  //   return res.sendStatus(200);
-  // }
+ 
   if (tempComplaints[phone]?.stage === 'awaiting_name' && tempComplaints[phone]?.isRegistering) {
     if (!text || text.length < 2) {
       await sendMessage(phone, 'Please enter a valid name (at least 2 characters)');
@@ -229,7 +184,6 @@ if (tempComplaints[phone]?.stage === 'awaiting_location') {
   return res.sendStatus(200);
 }
 
-// Fallback
 await sendMessage(phone, 'Please send "Hi" to start');
 return res.sendStatus(200);
 
@@ -251,7 +205,6 @@ await Registration.updateOne(
 }
 );
 
-// Notify owner
 const owner = await Registration.findOne({ 'vehicles.number': vehicleNumber });
 if (owner) {
 await sendMessage(
