@@ -23,7 +23,7 @@ function sendMessage(phone, text, buttons = []) {
       : { text: { body: text } }),
   };
   return axios.post(process.env.WHATSAPP_API_URL, data, {
-    headers: { Authorization: `Bearer ${process.env. WHATSAPP_TOKEN}` },
+    headers: { Authorization: `Bearer ${process.env.WHATSAPP_TOKEN}` },
   });
 }
 
@@ -39,7 +39,7 @@ function extractText(msg) {
 const tempComplaints = {};
 const COMPLAINT_REASONS = [
   'Wrong parking',
-  'Blocking entrance',
+  'Obstructing road',
   'Other'
 ];
 
@@ -52,7 +52,12 @@ exports.handleWebhook = (async(req, res) => {
   const text = extractText(message).trim();
   if (text.toLowerCase() === 'hi') {
     delete tempComplaints[phone];
+
+    const welcomeMessage = `Welcome to Vehicle Alert! 🚗\nThank you for choosing us.\nYour data will remain confidential and secure.\n\nWhat would you like to do?`;
+
+    await sendMessage(phone, welcomeMessage);
     await sendMessage(phone, 'Choose option:', ['Register', 'Complain']);
+   // await sendMessage(phone, 'Choose option:', ['Register', 'Complain']);
     return res.sendStatus(200);
   }
   if (text.toLowerCase() === 'register') {
@@ -63,53 +68,117 @@ exports.handleWebhook = (async(req, res) => {
     };
     return res.sendStatus(200);
   }
+  // if (tempComplaints[phone]?.stage === 'awaiting_name' && tempComplaints[phone]?.isRegistering) {
+  //   if (!text || text.length < 2) {
+  //     await sendMessage(phone, 'Please enter a valid name (at least 2 characters)');
+  //     return res.sendStatus(200);
+  //   }
+    
+  //   tempComplaints[phone].name = text;
+  //   tempComplaints[phone].stage = 'awaiting_vehicle';
+  //   await sendMessage(phone, ' Please enter your vehicle No:');
+  //   return res.sendStatus(200);
+  // }
+  // if (tempComplaints[phone]?.stage === 'awaiting_vehicle' && tempComplaints[phone]?.isRegistering) {
+  //   if (!text || text.length < 3) {
+  //     await sendMessage(phone, 'Please enter your vehicle No.');
+  //     return res.sendStatus(200);
+  //   }
+  //   const vehicleExists = await Registration.exists({ 'vehicles.number': text });
+      
+  //   if (vehicleExists) {
+  //     await sendMessage(phone, `❌ Vehicle number ${text} is already registered. Please use a different number.`);
+  //     return res.sendStatus(200);
+  //   }
+  //   const userHasVehicle = await Registration.exists({ 
+  //     phone,
+  //     'vehicles.number': text 
+  //   });
+    
+  //   if (userHasVehicle) {
+  //     await sendMessage(phone, `ℹ️ You've already registered vehicle ${text}.`);
+  //     delete tempComplaints[phone];
+  //     return res.sendStatus(200);
+  //   }
+  //   await Registration.findOneAndUpdate(
+  //     { phone },
+  //     { 
+  //       $set: { name: tempComplaints[phone].name },
+  //       $push: { vehicles: { number: text, complaints: [] } } 
+  //     },
+  //     { upsert: true }
+  //   );
+
+  //   delete tempComplaints[phone];
+  //   await sendMessage(phone, '✅ Registration successful!');
+  //   return res.sendStatus(200);
+  // }
   if (tempComplaints[phone]?.stage === 'awaiting_name' && tempComplaints[phone]?.isRegistering) {
     if (!text || text.length < 2) {
       await sendMessage(phone, 'Please enter a valid name (at least 2 characters)');
       return res.sendStatus(200);
     }
-    
+  
     tempComplaints[phone].name = text;
     tempComplaints[phone].stage = 'awaiting_vehicle';
-    await sendMessage(phone, 'Please enter your vehicle number:');
+    await sendMessage(phone, 'Please enter your vehicle No:');
     return res.sendStatus(200);
   }
+  
   if (tempComplaints[phone]?.stage === 'awaiting_vehicle' && tempComplaints[phone]?.isRegistering) {
     if (!text || text.length < 3) {
-      await sendMessage(phone, 'Please enter a valid vehicle number');
+      await sendMessage(phone, 'Please enter a valid vehicle number.');
       return res.sendStatus(200);
     }
+  
     const vehicleExists = await Registration.exists({ 'vehicles.number': text });
-      
+  
     if (vehicleExists) {
       await sendMessage(phone, `❌ Vehicle number ${text} is already registered. Please use a different number.`);
       return res.sendStatus(200);
     }
+  
     const userHasVehicle = await Registration.exists({ 
       phone,
       'vehicles.number': text 
     });
-    
+  
     if (userHasVehicle) {
       await sendMessage(phone, `ℹ️ You've already registered vehicle ${text}.`);
       delete tempComplaints[phone];
       return res.sendStatus(200);
     }
+  
+    tempComplaints[phone].vehicle = text;
+    tempComplaints[phone].stage = 'awaiting_location';
+    await sendMessage(phone, '📍 Please enter your location (e.g. "Near Gate A or Block B"):');
+    return res.sendStatus(200);
+  }
+  
+  if (tempComplaints[phone]?.stage === 'awaiting_location' && tempComplaints[phone]?.isRegistering) {
+    if (!text || text.length < 3) {
+      await sendMessage(phone, '⚠️ Please enter a valid location.');
+      return res.sendStatus(200);
+    }
+  
+    const { name, vehicle } = tempComplaints[phone];
+  
     await Registration.findOneAndUpdate(
       { phone },
       { 
-        $set: { name: tempComplaints[phone].name },
-        $push: { vehicles: { number: text, complaints: [] } } 
+        $set: { name },
+        $push: { vehicles: { number: vehicle, location: text, complaints: [] } } 
       },
       { upsert: true }
     );
-
+  
     delete tempComplaints[phone];
-    await sendMessage(phone, '✅ Registration successful!');
+    await sendMessage(phone, `✅ Thank you. Your vehicle ${vehicle} is successfully registered with us.Your data is safe with us`);
     return res.sendStatus(200);
   }
+  
 if (text.toLowerCase() === 'complain') {
-  await sendMessage(phone, 'Enter vehicle number to complain about:');
+  await sendMessage(phone, 'Please enter the Vehicle no for which you want to raise complaint:');
   tempComplaints[phone] = { stage: 'awaiting_vehicle' };
   return res.sendStatus(200);
 }
@@ -120,7 +189,7 @@ if (tempComplaints[phone]?.stage === 'awaiting_vehicle') {
       stage: 'awaiting_reason',
       vehicleNumber: text
     };
-    await sendMessage(phone, 'Select complaint reason:', COMPLAINT_REASONS);
+    await sendMessage(phone, 'What is the issue you are facing:', COMPLAINT_REASONS);
   } else {
     await sendMessage(phone, '❌ Vehicle not found. Try again or send "Hi"');
   }
@@ -135,7 +204,7 @@ if (tempComplaints[phone]?.stage === 'awaiting_reason') {
   } else {
     tempComplaints[phone].reason = text;
     tempComplaints[phone].stage = 'awaiting_location';
-    await sendMessage(phone, '📍 Please enter the location (e.g. "Near Main Gate, Parking Lot A"):');
+    await sendMessage(phone, '📍 Please enter your location:');
   }
   return res.sendStatus(200);
 }
@@ -194,7 +263,7 @@ await sendMessage(
 }
 
 delete tempComplaints[phone];
-await sendMessage(phone, '✅ Your complaint has been recorded and sent.');
+await sendMessage(phone, '✅ Have forwarded the details to the vehicle owner, will forward the reply the car owner shares with us.');
 }
 
 exports.getWebhook = (req, res) => {

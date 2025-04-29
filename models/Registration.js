@@ -3,13 +3,15 @@ const mongoose = require('mongoose');
 const vehicleSchema = new mongoose.Schema({
   number: String,
   status: { type: String, enum: ['registered', 'complained'], default: 'registered' },
+  location: String,
+
  complaints: [{
   complaint: String,
   complainedBy: String,
   location: String,
   at: { type: Date, default: Date.now }
 }]
-}, { _id: false });
+},);
 
 
 const registrationSchema = new mongoose.Schema({
