@@ -47,3 +47,36 @@ exports.getVehicleByNumber = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
+
+
+exports.deleteVehicleById = async (req, res) => {
+  const { userId, vehicleNumber } = req.params;
+  console.log(userId,vehicleNumber)
+  try {
+    await Registration.findByIdAndUpdate(userId, {
+      $pull: { vehicles: { _id: vehicleNumber } }
+    });
+
+    const user = await Registration.findById(userId);
+
+    if (!user) {
+      return res.status(404).send({ error: 'User not found' });
+    }
+
+    if (user.vehicles.length === 0) {
+      await Registration.findByIdAndDelete(userId);
+      return res.status(200).send({ message: 'Last vehicle deleted, user also removed' });
+    }
+
+    res.status(200).send({ message: 'Vehicle removed' });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({ error: 'Failed to delete vehicle or user' });
+  }
+};
+
+
+
+

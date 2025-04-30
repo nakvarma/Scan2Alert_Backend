@@ -5,18 +5,18 @@ const vehicleSchema = new mongoose.Schema({
   status: { type: String, enum: ['registered', 'complained'], default: 'registered' },
   location: String,
 
- complaints: [{
-  complaint: String,
-  complainedBy: String,
-  location: String,
-  at: { type: Date, default: Date.now }
-}]
+  complaints: [{
+    complaint: String,
+    complainedBy: String,
+    location: String,
+    at: { type: Date, default: Date.now }
+  }]
 },);
 
 
 const registrationSchema = new mongoose.Schema({
   phone: String,
-  name:String,
+  name: String,
 
   vehicles: [vehicleSchema],
   reason: String,

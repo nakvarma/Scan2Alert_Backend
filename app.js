@@ -3,10 +3,10 @@ const bodyParser = require('body-parser');
 const axios = require('axios');
 const mongoose = require('./config/db');
 const registration = require('./routes/registrationRoutes');
-const webhookRoutes = require('./routes/webhookRoutes'); 
+const webhookRoutes = require('./routes/webhookRoutes');
 const cors = require('cors');
 const app = express();
-const PORT = process.env.PORT ||  3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
 app.use(cors());

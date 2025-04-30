@@ -6,5 +6,6 @@ router.get('/registrations', registrationController.getAllRegistrations);
 router.get('/registrations/:id', registrationController.getRegistrationById);
 router.delete('/registrations/:id', registrationController.deleteRegistrationById);
 router.get('/registrations/vehicle/:number', registrationController.getVehicleByNumber);
+router.delete('/registrations/:userId/vehicles/:vehicleNumber', registrationController.deleteVehicleById);
 
 module.exports = router;
