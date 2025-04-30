@@ -14,7 +14,6 @@ app.use('/', registration);
 
 app.use('/', webhookRoutes);
 
-
 app.get('/', (req, res) => {
   res.send('Server is working fine!');
 });
