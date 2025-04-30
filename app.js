@@ -15,6 +15,9 @@ app.use('/', registration);
 app.use('/', webhookRoutes);
 
 
+app.get('/', (req, res) => {
+  res.send('Server is working fine!');
+});
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
