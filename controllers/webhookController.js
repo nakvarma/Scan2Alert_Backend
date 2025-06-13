@@ -1,8 +1,9 @@
+
 const axios = require('axios');
 const Registration = require('../models/Registration');
 
-const token =process.env.WHATSAPP_TOKEN;
-
+// const token = "EAAIAjTZBZCCWoBOyzjj9z5KKtTALVZATqmfZBIRfrz2m83njMG8xZA7FZCcrZAf20EZAxpwrzlMHwPrlcU9xFpJZCb6FCnEqrq0ryyZCaIoDmmxOzyKJNVUxtkM5LSKzZCiI7T1vjzFTcGWvLZCnRKq2ZB1Ks8ot5ZBmD37GTu9uFoExxFXNNFuRzbulZBYTpfDp4mYWlYwPp7C25UWxqZBN60IbjTKwqWNzrPe53rp5ZAq3x5GZCOLT0GkZBcZD"
+const token=process.env.WHATSAPP_TOKEN;
 function sendMessage(phone, text, buttons = []) {
   const data = {
     messaging_product: 'whatsapp',
@@ -25,7 +26,7 @@ function sendMessage(phone, text, buttons = []) {
   };
 
   return axios.post(
-    'https://graph.facebook.com/v22.0/595249923680121/messages',
+    process.env.WHATSAPP_API_URL,
     data,
     {
       headers: { Authorization: `Bearer ${token}` },
@@ -43,6 +44,7 @@ function extractText(msg) {
   }
   return '';
 }
+
 async function reverseGeocode(latitude, longitude) {
   const apiKey = process.env.GOOGLE_MAPS_API_KEY;
   const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${apiKey}`;
@@ -56,7 +58,7 @@ async function reverseGeocode(latitude, longitude) {
     return `Lat: ${latitude}, Long: ${longitude}`;
   } catch (err) {
     console.error('Geocoding error:', err.message);
-    return `Lat: ${latitude}, Long: ${longitude}`; // fallback
+    return `Lat: ${latitude}, Long: ${longitude}`;
   }
 }
 
@@ -68,13 +70,29 @@ exports.handleWebhook = async (req, res) => {
   const message = entry?.changes?.[0]?.value?.messages?.[0];
   if (!message) return res.sendStatus(200);
 
-  const phone = message.from;
+  // const phone = message.from;
+  const phone = message.from.replace(/\D/g, '').replace(/^0/, '92').trim();
 
-  // ✅ Handle location message
+
+  if (tempComplaints[phone]?.stage === 'awaiting_owner_response') {
+    const response = extractText(message).trim();
+    const complainantPhone = tempComplaints[phone].originalComplainant;
+
+
+    if (complainantPhone) {
+      await sendMessage(
+        complainantPhone,
+        `📩 The vehicle owner responded:\n"${response}"`
+      );
+    }
+
+    delete tempComplaints[phone];
+    return res.sendStatus(200);
+  }
+
   if (message.type === 'location') {
-    const { latitude, longitude, name, address } = message.location;
-    // const locationText = `${name || address} (Lat: ${latitude}, Long: ${longitude})`;
-const locationText = await reverseGeocode(latitude, longitude);
+    const { latitude, longitude } = message.location;
+    const locationText = await reverseGeocode(latitude, longitude);
 
     const session = tempComplaints[phone];
     if (session?.stage === 'awaiting_location') {
@@ -98,7 +116,7 @@ const locationText = await reverseGeocode(latitude, longitude);
         delete tempComplaints[phone];
         await sendMessage(
           phone,
-          `✅ Thank you. Your vehicle ${vehicle}  is successfully registered with us.Your data is safe with us.`
+          `✅ Thank you. Your vehicle ${vehicle} is successfully registered with us. Your data is safe with us.`
         );
       } else {
         await saveComplaint(
@@ -173,28 +191,12 @@ const locationText = await reverseGeocode(latitude, longitude);
       return res.sendStatus(200);
     }
 
-    const userHasVehicle = await Registration.exists({
-      phone,
-      'vehicles.number': text,
-    });
-
-    if (userHasVehicle) {
-      await sendMessage(
-        phone,
-        `ℹ️ You've already registered vehicle ${text}.`
-      );
-      delete tempComplaints[phone];
-      return res.sendStatus(200);
-    }
-
     tempComplaints[phone].vehicle = text;
     tempComplaints[phone].stage = 'awaiting_location';
     await sendMessage(
       phone,
       '📍 Please *share* your live location using the 📎 (attachment) icon in WhatsApp.'
     );
-
-
     return res.sendStatus(200);
   }
 
@@ -233,7 +235,6 @@ const locationText = await reverseGeocode(latitude, longitude);
 
   if (tempComplaints[phone]?.stage === 'awaiting_reason') {
     const isOtherOption = text === 'other';
-
     if (isOtherOption) {
       tempComplaints[phone].stage = 'awaiting_custom_reason';
       await sendMessage(phone, 'Please describe the issue:');
@@ -262,6 +263,51 @@ const locationText = await reverseGeocode(latitude, longitude);
   return res.sendStatus(200);
 };
 
+// async function saveComplaint(phone, vehicleNumber, reason, locationText) {
+//   await Registration.updateOne(
+//     { 'vehicles.number': vehicleNumber },
+//     {
+//       $set: { 'vehicles.$.status': 'complained' },
+//       $push: {
+//         'vehicles.$.complaints': {
+//           complaint: reason,
+//           complainedBy: phone,
+//           location: locationText,
+//         },
+//       },
+//     }
+//   );
+
+//   const owner = await Registration.findOne({
+//     'vehicles.number': vehicleNumber,
+//   });
+
+//   if (owner) {
+//     await sendMessage(
+//       owner.phone,
+//       `🚨 Complaint for vehicle ${vehicleNumber}:\n` +
+//         `Reason: ${reason}\n` +
+//         `Location: ${locationText}\n\nPlease respond:`,
+// [
+//     'Move in 10 min',
+//     'On call, wait',
+//     'Moving now'
+//   ]
+//     );
+
+//     // Save complainant's info to route response back
+//     tempComplaints[owner.phone] = {
+//       stage: 'awaiting_owner_response',
+//       originalComplainant: phone,
+//     };
+//   }
+
+//   delete tempComplaints[phone];
+//   await sendMessage(
+//     phone,
+//     '✅ We have forwarded your complaint to the vehicle owner. We’ll let you know once they respond.'
+//   );
+// }
 async function saveComplaint(phone, vehicleNumber, reason, locationText) {
   await Registration.updateOne(
     { 'vehicles.number': vehicleNumber },
@@ -282,18 +328,34 @@ async function saveComplaint(phone, vehicleNumber, reason, locationText) {
   });
 
   if (owner) {
+    // ✅ Normalize owner's phone to 92xxxxxxxxxx format
+    let rawPhone = owner.phone;
+    if (!rawPhone.startsWith('92')) {
+      rawPhone = rawPhone.replace(/^0/, '92'); // Convert 03xx to 92xx
+    }
+    const normalizedOwnerPhone = rawPhone.replace(/\D/g, '').trim();
+
+    // ✅ Store temp session with normalized phone
+    tempComplaints[normalizedOwnerPhone] = {
+      stage: 'awaiting_owner_response',
+      originalComplainant: phone,
+    };
+
+
     await sendMessage(
-      owner.phone,
+      normalizedOwnerPhone,
       `🚨 Complaint for vehicle ${vehicleNumber}:\n` +
         `Reason: ${reason}\n` +
-        `Location: ${locationText}`
+        `Location: ${locationText}\n\nPlease respond:`,
+      ['Move in 10 min', 'On call, wait', 'Moving now']
     );
   }
 
   delete tempComplaints[phone];
+
   await sendMessage(
     phone,
-    '✅ Have forwarded the details to the vehicle owner, will forward the reply the car owner shares with us.'
+    '✅ We have forwarded your complaint to the vehicle owner. We’ll let you know once they respond.'
   );
 }
 
@@ -302,7 +364,6 @@ exports.getWebhook = (req, res) => {
   const mode = req.query['hub.mode'];
   const token = req.query['hub.verify_token'];
   const challenge = req.query['hub.challenge'];
-  console.log(mode, token, challenge);
 
   if (mode && token && mode === 'subscribe' && token === VERIFY_TOKEN) {
     res.status(200).send(challenge);
@@ -310,10 +371,6 @@ exports.getWebhook = (req, res) => {
     res.sendStatus(403);
   }
 };
-
-
-
-
 
 
 
