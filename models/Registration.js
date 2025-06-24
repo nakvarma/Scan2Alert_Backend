@@ -3,7 +3,9 @@ const mongoose = require('mongoose');
 const vehicleSchema = new mongoose.Schema({
   number: String,
   status: { type: String, enum: ['registered', 'complained'], default: 'registered' },
+  dispatchAddress: String,
   location: String,
+
 
   complaints: [{
     complaint: String,
