@@ -5,6 +5,7 @@ const vehicleSchema = new mongoose.Schema({
   status: { type: String, enum: ['registered', 'complained'], default: 'registered' },
   dispatchAddress: String,
   location: String,
+    at: { type: Date, default: Date.now },
 
 
   complaints: [{
