@@ -2,7 +2,7 @@ require('dotenv').config();
 
 const mongoose = require('mongoose');
 
-mongoose.connect("mongodb+srv://sajidnazirbytecraft:sajidnazirbytecraft@cluster0.snlpv42.mongodb.net/Registration?retryWrites=true&w=majority&appName=Cluster0", {
+mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   serverSelectionTimeoutMS: 5000, 
