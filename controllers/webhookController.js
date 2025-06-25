@@ -377,27 +377,81 @@ require('dotenv').config();
 const axios = require('axios');
 const Registration = require('../models/Registration');
 
-// const token = "EAAIAjTZBZCCWoBO2Px58qQgxlZBq8TftZByIsAuZAmjkTP4HCu3zcyfZCbtM2NiXaQZBJIVkAhtw9qUEdqOF05MsocIW1wZC90DBuWYLcScaRfYHy0nyND9ijrsooWBNtj9Q6Gbl5ly7ZAGShNp84r5dUucXi8S2ZBaQ6NI0THOKYp7wH8ZCXtDczhqkzGlr3DimqKZCbfNvAxc7l4aKNC7ViA0lDgZAPvgcGZA2dq7YZB5muZAsja6ZBl5kZD"
-const token = process.env.WHATSAPP_TOKEN;
+//  const token = "EAAIAjTZBZCCWoBO2xiygYGqA4eWcbgeZBC2qDMHcxB7mP0iwsmcqAv8DD99KvEbhK0mwCmY2QrnO1P4BaqTrZCGvIgTv3MNYoL9HpK5fUXZCXflM60ZBkJvgTpPN0Nti2UTi66Dje5N4giIZAEzdEvznd3jBG8RZBtYZAnZCRnQ7mK0YvZC2cSVt1PAZBkTqt89ZCdW7ZArWwOtZAdavJOzdGVNFZA5qNQX1bZBu6uPKUMTKCS0V5pkHiLLEVRTYFn3E5hwZDZD"
+ const token = process.env.WHATSAPP_TOKEN;
 
-function sendMessage(phone, text, buttons = []) {
+// function sendMessage(phone, text, buttons = []) {
+//   const data = {
+//     messaging_product: 'whatsapp',
+//     to: phone,
+//     type: buttons.length ? 'interactive' : 'text',
+//     ...(buttons.length
+//       ? {
+//         interactive: {
+//           type: 'button',
+//           body: { text },
+//           action: {
+//             buttons: buttons.map((b, i) => ({
+//               type: 'reply',
+//               reply: { id: `btn_${i}`, title: b },
+//             })),
+//           },
+//         },
+//       }
+//       : { text: { body: text } }),
+//   };
+
+//   return axios.post(
+//    "https://graph.facebook.com/v23.0/669530022912116/messages",
+//     data,
+//     {
+//       headers: { Authorization: `Bearer ${token}` },
+//     }
+//   );
+// }
+function sendMessage(phone, text, options = []) {
+  const isList = options.length > 3;
+
   const data = {
     messaging_product: 'whatsapp',
     to: phone,
-    type: buttons.length ? 'interactive' : 'text',
-    ...(buttons.length
-      ? {
-        interactive: {
-          type: 'button',
-          body: { text },
-          action: {
-            buttons: buttons.map((b, i) => ({
-              type: 'reply',
-              reply: { id: `btn_${i}`, title: b },
-            })),
-          },
-        },
-      }
+    type: options.length ? 'interactive' : 'text',
+    ...(options.length
+      ? isList
+        ? {
+            interactive: {
+              type: 'list',
+              body: { text: text.slice(0, 1024) },
+              action: {
+                button: 'Choose Option',
+                sections: [
+                  {
+                    title: 'Complaint Reasons',
+                    rows: options.map((opt, i) => ({
+                      id: `opt_${i}`,
+                      title: opt.title.slice(0, 24),
+                      description: opt.description?.slice(0, 72) || '',
+                    })),
+                  },
+                ],
+              },
+            },
+          }
+        : {
+            interactive: {
+              type: 'button',
+              body: { text },
+              action: {
+                buttons: options.slice(0, 3).map((b, i) => ({
+                  type: 'reply',
+                  reply: {
+                    id: `btn_${i}`,
+                    title: typeof b === 'string' ? b : b.title,
+                  },
+                })),
+              },
+            },
+          }
       : { text: { body: text } }),
   };
 
@@ -405,11 +459,84 @@ function sendMessage(phone, text, buttons = []) {
     process.env.WHATSAPP_API_URL,
     data,
     {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
     }
   );
 }
 
+// async function sendMessage(phone, text, options = []) {
+//   const isList = options.length > 3;
+//   const data = {
+//     messaging_product: 'whatsapp',
+//     to: phone,
+//   };
+
+//   if (options.length) {
+//     data.type = 'interactive';
+
+//     if (isList) {
+//       data.interactive = {
+//         type: 'list',
+//         body: { text: text.slice(0, 1024).replace(/\n+/g, ' ') }, // sanitize body
+//         action: {
+//           button: 'Choose', // must be ≤20 chars
+//           sections: [
+//             {
+//               title: 'Options',
+//               // rows: options.map((opt, i) => ({
+//               //   id: `opt_${i}`,
+//               //   title: opt.slice(0, 72), // limit title length
+//               // }))
+//               // 
+//             rows: options.map((opt, i) => ({
+//   id: `opt_${i}`,
+//   title: opt.title.slice(0, 24),
+//   description: opt.description?.slice(0, 72) || ''
+// }))
+// ,
+//             },
+//           ],
+//         },
+//       };
+//     } else {
+//       data.interactive = {
+//         type: 'button',
+//         body: { text },
+//         action: {
+//           buttons: options.slice(0, 3).map((b, i) => ({
+//             type: 'reply',
+//             reply: {
+//               id: `btn_${i}`,
+//               title: b.slice(0, 20),
+//             },
+//           })),
+//         },
+//       };
+//     }
+//   } else {
+//     data.type = 'text';
+//     data.text = { body: text };
+//   }
+
+//   try {
+//     const response = await axios.post(
+//       'https://graph.facebook.com/v23.0/669530022912116/messages',
+//       data,
+//       {
+//         headers: {
+//           Authorization: `Bearer ${token}`,
+//           'Content-Type': 'application/json',
+//         },
+//       }
+//     );
+//     return response;
+//   } catch (err) {
+//     console.error('❌ WhatsApp API Error:', JSON.stringify(err.response?.data, null, 2));
+//   }
+// }
 
 async function sendLocationRequest(phone) {
   const data = {
@@ -430,7 +557,7 @@ async function sendLocationRequest(phone) {
 
   try {
     await axios.post(
-      'https://graph.facebook.com/v23.0/669530022912116/messages', // replace with your Phone Number ID
+      process.env.WHATSAPP_API_URL, // replace with your Phone Number ID
       data,
       {
         headers: {
@@ -444,18 +571,32 @@ async function sendLocationRequest(phone) {
   }
 }
 
-
-
 function extractText(msg) {
   if (msg.type === 'text') return msg.text.body.toLowerCase();
-  if (
-    msg.type === 'interactive' &&
-    msg.interactive.type === 'button_reply'
-  ) {
-    return msg.interactive.button_reply.title.toLowerCase();
+
+  if (msg.type === 'interactive') {
+    if (msg.interactive.type === 'button_reply') {
+      return msg.interactive.button_reply.title.toLowerCase();
+    }
+    if (msg.interactive.type === 'list_reply') {
+      return msg.interactive.list_reply.title.toLowerCase();
+    }
   }
+
   return '';
 }
+
+
+// function extractText(msg) {
+//   if (msg.type === 'text') return msg.text.body.toLowerCase();
+//   if (
+//     msg.type === 'interactive' &&
+//     msg.interactive.type === 'button_reply'
+//   ) {
+//     return msg.interactive.button_reply.title.toLowerCase();
+//   }
+//   return '';
+// }
 
 async function reverseGeocode(latitude, longitude) {
   const apiKey = process.env.GOOGLE_MAPS_API_KEY;
@@ -475,7 +616,44 @@ async function reverseGeocode(latitude, longitude) {
 }
 
 const tempComplaints = {};
-const COMPLAINT_REASONS = ['Wrongly parked', 'Obstructing road', 'Other'];
+// const COMPLAINT_REASONS = ['Wrongly parked', 'Obstructing road', 'Other'];
+// const COMPLAINT_REASONS = [ 'Wrong Vehicle Parking',
+//   'Obstructing road',
+//   'No sticker',
+//   'Dangerous parking',
+//   'Other'];
+
+const COMPLAINT_REASONS = [
+  { title: '❗ Wrong Vehicle Parking', description: 'Your Vehicle Wrongly parked' },
+  { title: 'Blocking road', description: 'Your Vehicle jamming the Road' },
+  { title: 'Lights/Siren/Unlocked', description: 'Lights turned on/ vehicle unlocked/siren going on' },
+  { title: 'Challan Issued', description: 'Generating a challan' },
+  {title:'Towing in Progress', description:'Towing vehicle, move immediately'},
+  { title: 'Other', description: 'Specify your own reason' }
+];
+const OWNER_RESPONSE_OPTIONS = [
+  {
+    title: 'Move in 5–10 mins',
+    description: 'Will move my vehicle in 5–10 minutes.'
+  },
+  {
+    title: 'On call, wait',
+    description: 'I am held up, will move my vehicle in 15–20 minutes.'
+  },
+  {
+    title: 'Unavailable now',
+    description: 'I am unavailable now. Sorry for the inconvenience.'
+  },
+  {
+    title: 'Delegate moving',
+    description: 'I have informed someone else to move the vehicle.'
+  },
+  {
+    title: 'Spam/Prank',
+    description: 'This complaint seems to be spam or a prank.'
+  }
+];
+
 
 exports.handleWebhook = async (req, res) => {
   const entry = req.body.entry?.[0];
@@ -896,13 +1074,24 @@ async function saveComplaint(phone, vehicleNumber, reason, locationText) {
     };
 
 
+    // await sendMessage(
+    //   normalizedOwnerPhone,
+    //   `🚨 Complaint for vehicle ${vehicleNumber}:\n` +
+    //   `Reason: ${reason}\n` +
+    //   `Location: ${locationText}\n\nPlease respond:`,
+    //   ['Will move my vehicle in 5-10 mins', 'On call, wait', 'Moving now']
+    // );
     await sendMessage(
-      normalizedOwnerPhone,
-      `🚨 Complaint for vehicle ${vehicleNumber}:\n` +
-      `Reason: ${reason}\n` +
-      `Location: ${locationText}\n\nPlease respond:`,
-      ['Move in 10 min', 'On call, wait', 'Moving now']
-    );
+  normalizedOwnerPhone,
+  `🚨 Complaint for vehicle ${vehicleNumber}\nReason: ${reason}\nLocation: ${locationText}`
+);
+
+await sendMessage(
+  normalizedOwnerPhone,
+  `Please respond:`,
+  OWNER_RESPONSE_OPTIONS
+);
+
   }
 
   delete tempComplaints[phone];
