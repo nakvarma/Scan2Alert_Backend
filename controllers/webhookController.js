@@ -2398,14 +2398,14 @@ if (complainantPhone) {
     const existingUser = await Registration.findOne({ phone });
     const vehicleCount = existingUser?.vehicles?.length || 0;
 
-    // if (vehicleCount >= 3) {
-    //   await sendMessage(
-    //     phone,
-    //     '❌ You have already registered 3 vehicles. This is the maximum allowed per account.'
-    //   );
-    //   delete tempComplaints[phone];
-    //   return res.sendStatus(200);
-    // }
+    if (vehicleCount >= 3) {
+      await sendMessage(
+        phone,
+        '❌ You have already registered 3 vehicles. This is the maximum allowed per account.'
+      );
+      delete tempComplaints[phone];
+      return res.sendStatus(200);
+    }
 
     const vehicleExists = await Registration.exists({
       'vehicles.number': text.toUpperCase(),
@@ -2463,13 +2463,13 @@ if (complainantPhone) {
           new Date(c.at).getTime() > now - 15 * 60 * 1000
         );
       });
-      // if (recentComplaint) {
-      //   await sendMessage(
-      //     phone,
-      //     '❌ You have already submitted a complaint for this vehicle. Please try again after 15 minutes.'
-      //   );
-      //   return res.sendStatus(200)
-      // }
+      if (recentComplaint) {
+        await sendMessage(
+          phone,
+          '❌ You have already submitted a complaint for this vehicle. Please try again after 15 minutes.'
+        );
+        return res.sendStatus(200)
+      }
       const recentUniqueUsers = new Set(
         complaints
           .filter(c => new Date(c.at).getTime() > now - 15 * 60 * 1000)
@@ -2488,13 +2488,13 @@ if (complainantPhone) {
         c.complainedBy === phone &&
         new Date(c.at).getTime() > twentyFourHourLimit
       );
-      // if (complaintsInLast24Hrs.length >= 3) {
-      //   await sendMessage(
-      //     phone,
-      //     '❌ You have submitted multiple complaints. Please send the complaint tomorrow.'
-      //   );
-      //   return res.sendStatus(200)
-      // }
+      if (complaintsInLast24Hrs.length >= 3) {
+        await sendMessage(
+          phone,
+          '❌ You have submitted multiple complaints. Please send the complaint tomorrow.'
+        );
+        return res.sendStatus(200)
+      }
       tempComplaints[phone] = {
         stage: 'awaiting_reason',
         vehicleNumber: text,
