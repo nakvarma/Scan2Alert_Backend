@@ -26,7 +26,7 @@
 //   };
 
 //   return axios.post(
-//     process.env.WHATSAPP_API_URL,
+//     process.env.process.env.WHATSAPP_API_URL,
 //     data,
 //     {
 //       headers: { Authorization: `Bearer ${token}` },
@@ -460,7 +460,7 @@
 //   };
 
 //   return axios.post(
-//     process.env.WHATSAPP_API_URL,
+//     process.env.process.env.WHATSAPP_API_URL,
 //     data,
 //     {
 //       headers: {
@@ -561,7 +561,7 @@
 
 //   try {
 //     await axios.post(
-//       process.env.WHATSAPP_API_URL, // replace with your Phone Number ID
+//       process.env.process.env.WHATSAPP_API_URL, // replace with your Phone Number ID
 //       data,
 //       {
 //         headers: {
@@ -603,7 +603,7 @@
 
 //   try {
 //     const response = await axios.post(
-//       process.env.WHATSAPP_API_URL, // e.g., https://graph.facebook.com/v18.0/<phone_number_id>/messages
+//       process.env.process.env.WHATSAPP_API_URL, // e.g., https://graph.facebook.com/v18.0/<phone_number_id>/messages
 //       data,
 //       {
 //         headers: {
@@ -1169,7 +1169,7 @@
 //   if (mode && token && mode === 'subscribe' && token === VERIFY_TOKEN) {
 //     res.status(200).send(challenge);
 //   } else {
-//     res.sendStatus(403);
+//     res.sendStatus(403); 
 //   }
 // };
 
@@ -1185,7 +1185,7 @@ require('dotenv').config();
 const axios = require('axios');
 const Registration = require('../models/Registration');
 
-//  const token = "EAAIAjTZBZCCWoBO2xiygYGqA4eWcbgeZBC2qDMHcxB7mP0iwsmcqAv8DD99KvEbhK0mwCmY2QrnO1P4BaqTrZCGvIgTv3MNYoL9HpK5fUXZCXflM60ZBkJvgTpPN0Nti2UTi66Dje5N4giIZAEzdEvznd3jBG8RZBtYZAnZCRnQ7mK0YvZC2cSVt1PAZBkTqt89ZCdW7ZArWwOtZAdavJOzdGVNFZA5qNQX1bZBu6uPKUMTKCS0V5pkHiLLEVRTYFn3E5hwZDZD"
+//  const token = "EAATDUOPTCisBO0P2H3ySY2PZA497ZA7OqrZAwmzWlPgh5HQtrgAcuAh1xKJnyayBvigb2GWKM1Bkwm3IdFkx5bZAeiPZBTZByDolsAH5T04myMWzrXXoXmLucXT8ZA8wZCQfkGMLEB7B3dMd2S06ZCpDEYjlv56TimmxOeFLKZApt4D3Nu8dyvooWxQSDFOeLWZAgZDZD"
 const token = process.env.WHATSAPP_TOKEN;
 
 // function sendMessage(phone, text, buttons = []) {
@@ -1405,11 +1405,11 @@ async function sendAddressRequest(phone) {
 
   try {
     const res = await axios.post(
-      process.env.WHATSAPP_API_URL, // example: https://graph.facebook.com/v15.0/PHONE_NUMBER_ID/messages
+     process.env.WHATSAPP_API_URL, // example: https://graph.facebook.com/v15.0/PHONE_NUMBER_ID/messages
       data,
       {
         headers: {
-          Authorization: `Bearer ${process.env.WHATSAPP_TOKEN}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       }
@@ -1421,33 +1421,466 @@ async function sendAddressRequest(phone) {
   }
 }
 
+// async function sendComplaintTemplate(phone, name, vehicleNo, reason, location) {
+//   const data = {
+//     messaging_product: 'whatsapp',
+//     to: phone,
+//     type: 'template',
+//     template: {
+//       name: 'send_alert_to_owner',
+//       language: {
+//         code: 'en'
+//       },
+//       components: [
+//         {
+//           type: 'body',
+//           parameters: [
+//             { type: 'text', text: name },        // {{1}}
+//             { type: 'text', text: vehicleNo },   // {{2}}
+//             { type: 'text', text: reason },      // {{3}}
+//             { type: 'text', text: location }     // {{4}}
+//           ]
+//         }
+//       ]
+//     }
+//   };
+
+//   try {
+//     const response = await axios.post(
+//   "process.env.WHATSAPP_API_URL", // e.g., https://graph.facebook.com/v18.0/<phone_number_id>/messages
+//       data,
+//       {
+//         headers: {
+//           Authorization: `Bearer ${token}`,
+//           'Content-Type': 'application/json'
+//         }
+//       }
+//     );
+//     console.log('✅ Template message sent to owner.');
+//     return response.data;
+//   } catch (err) {
+//     console.error('❌ Template send error:', err.response?.data || err.message);
+//   }
+// }
+
+
+
+// async function sendComplaintTemplate(phone, name, vehicleNo, reason, location) {
+//   const data = {
+//     messaging_product: 'whatsapp',
+//     to: phone,
+//     type: 'template',
+//     template: {
+//       name: 'send_alert_to_owner',
+//       language: {
+//         code: 'en'
+//       },
+//       components: [
+//         {
+//           type: 'header',
+//           sub_type: 'image',
+//           parameters: [
+//             {
+//               type: 'image',
+//               image: {
+//                 link: 'https://yourdomain.com/sample.jpg' // ✅ Must be publicly accessible image
+//               }
+//             }
+//           ]
+//         },
+//         {
+//           type: 'body',
+//           parameters: [
+//             { type: 'text', text: vehicleNo },
+//             { type: 'text', text: reason },
+//             { type: 'text', text: location }
+//           ]
+//         }
+//       ]
+//     }
+//   };
+
+//   try {
+//     const response = await axios.post(
+//       "process.env.WHATSAPP_API_URL",
+//       data,
+//       {
+//         headers: {
+//           Authorization: `Bearer ${token}`,
+//           'Content-Type': 'application/json'
+//         }
+//       }
+//     );
+//     console.log('✅ Template message sent to owner.');
+//     return response.data;
+//   } catch (err) {
+//     console.error('❌ Template send error:', err.response?.data || err.message);
+//   }
+// }
+
+// async function sendComplaintTemplate(phone, name, vehicleNo, reason, location) {
+//   const data = {
+//     messaging_product: 'whatsapp',
+//     to: phone,
+//     type: 'template',
+//     template: {
+//       name: 'send_complaint_3', // Make sure this matches the approved template name
+//       language: { code: 'en' },
+//       components: [
+//         {
+//           type: 'body',
+//           parameters: [
+//             { type: 'text', text: name },        // {{1}} → Name
+//             { type: 'text', text: vehicleNo },   // {{2}} → Vehicle No
+//             { type: 'text', text: reason },      // {{3}} → Reason
+//             { type: 'text', text: location }     // {{4}} → Location
+//           ]
+//         }
+//       ]
+//     }
+//   };
+
+//   try {
+//     const response = await axios.post(
+//       'process.env.WHATSAPP_API_URL',
+//       data,
+//       {
+//         headers: {
+//           Authorization: `Bearer ${token}`,
+//           'Content-Type': 'application/json'
+//         }
+//       }
+//     );
+//     console.log('✅ Template sent successfully.');
+//     return response.data;
+//   } catch (err) {
+//     console.error('❌ Template send error:', err.response?.data || err.message);
+//   }
+// }
+
+// async function sendComplaintWithResponseOptions(phone, name, vehicleNo, reason, location) {
+//   const plainText = `Hello ${name},
+
+// Someone raised an alert about your vehicle *${vehicleNo}* 🚨
+
+// Issue faced: *${reason}*
+// Location: *${location}*
+
+// Please respond using the options below 👇`;
+
+//   // 1. Plain text message
+//   const textData = {
+//     messaging_product: 'whatsapp',
+//     to: phone,
+//     type: 'text',
+//     text: {
+//       body: plainText,
+//       preview_url: false
+//     }
+//   };
+
+//   // 2. List response options
+//   const listData = {
+//     messaging_product: 'whatsapp',
+//     to: phone,
+//     type: 'interactive',
+//     interactive: {
+//       type: 'list',
+//       header: {
+//         type: 'text',
+//         text: 'Respond to Complaint'
+//       },
+//       body: {
+//         text: 'Please select how you wish to respond:'
+//       },
+//       footer: {
+//         text: 'Scan2Alert'
+//       },
+//       action: {
+//         button: 'Choose Response',
+//         sections: [
+//           {
+//             title: 'Options',
+//             rows: [
+//               {
+//                 id: 'move_soon',
+//                 title: 'Will Move in 5–10 mins',
+//                 description: 'Acknowledged, moving vehicle'
+//               },
+//               {
+//                 id: 'call_later',
+//                 title: 'On Call – Wait',
+//                 description: 'Busy at the moment'
+//               },
+//               {
+//                 id: 'invalid_alert',
+//                 title: 'This is a spam alert',
+//                 description: 'No action needed'
+//               }
+//             ]
+//           }
+//         ]
+//       }
+//     }
+//   };
+
+//   try {
+//     const [textRes, listRes] = await Promise.all([
+//       axios.post(
+//         'process.env.WHATSAPP_API_URL',
+//         textData,
+//         {
+//           headers: {
+//             Authorization: `Bearer ${token}`,
+//             'Content-Type': 'application/json'
+//           }
+//         }
+//       ),
+//       axios.post(
+//         'process.env.WHATSAPP_API_URL',
+//         listData,
+//         {
+//           headers: {
+//             Authorization: `Bearer ${token}`,
+//             'Content-Type': 'application/json'
+//           }
+//         }
+//       )
+//     ]);
+
+//     console.log('✅ Complaint message and list options sent successfully');
+//     return { text: textRes.data, list: listRes.data };
+//   } catch (err) {
+//     console.error('❌ Error sending messages:', err.response?.data || err.message);
+//   }
+// }
+
+// async function sendComplaintWithList(phone, name, vehicleNo, reason, location) {
+//   const listData = {
+//     messaging_product: 'whatsapp',
+//     to: phone,
+//     type: 'interactive',
+//     interactive: {
+//       type: 'list',
+//       header: {
+//         type: 'text',
+//         text: '🚨 Vehicle Complaint'
+//       },
+//       body: {
+//         text:
+// `Hello ${name},
+
+// Someone raised an alert about your vehicle *${vehicleNo}*.
+
+// Issue: *${reason}*
+// Location: *${location}*
+
+// Please choose how you want to respond below 👇`
+//       },
+//       footer: {
+//         text: 'Scan2Alert'
+//       },
+//       action: {
+//         button: 'Choose Response',
+//         sections: [
+//           {
+//             title: 'Available Responses',
+//             rows: [
+//               {
+//                 id: 'move_soon',
+//                 title: 'Will Move in 5–10 mins',
+//                 description: 'Acknowledged, moving vehicle'
+//               },
+//               {
+//                 id: 'call_later',
+//                 title: 'On Call – Wait',
+//                 description: 'Busy at the moment'
+//               },
+//               {
+//                 id: 'invalid_alert',
+//                 title: 'This is a spam alert',
+//                 description: 'No action needed'
+//               }
+//             ]
+//           }
+//         ]
+//       }
+//     }
+//   };
+
+//   try {
+//     const res = await axios.post(
+//       'process.env.WHATSAPP_API_URL',
+//       listData,
+//       {
+//         headers: {
+//           Authorization: `Bearer ${token}`,
+//           'Content-Type': 'application/json'
+//         }
+//       }
+//     );
+//     console.log('✅ Complaint list message sent successfully');
+//     return res.data;
+//   } catch (err) {
+//     console.error('❌ Error sending list message:', err.response?.data || err.message);
+//   }
+// }
+
+
+
+// async function sendComplaintTemplate(phone, name, vehicleNo, reason, location) {
+//   const data = {
+//     messaging_product: 'whatsapp',
+//     to: phone,
+//     type: 'template',
+//     template: {
+//       name: 'testing_9', // 👈 replace with your approved template name
+//       language: {
+//         code: 'en'
+//       },
+//       components: [
+//         {
+//           type: 'body',
+//           parameters: [
+//             { type: 'text', text: name },        // {{1}} - Owner's name
+//             { type: 'text', text: vehicleNo },   // {{2}} - Vehicle No
+//             { type: 'text', text: reason },      // {{3}} - Reason
+//             { type: 'text', text: location }     // {{4}} - Location
+//           ]
+//         },
+//         {
+//           type: 'button',
+//           sub_type: 'flow',
+//           index: 0, // 👈 this must match the button position in your template
+//           parameters: [
+//             {
+//               type: 'flow',
+//               flow: {
+//                 name: 'Message templates_send_complaint_UTILITY_96c4d', // 👈 exact flow name from Meta (case-sensitive)
+//                 params: {
+//                   // Optional: if your flow requires parameters
+//                 }
+//               }
+//             }
+//           ]
+//         }
+//       ]
+//     }
+//   };
+
+//   try {
+//     const response = await axios.post(
+//       'process.env.WHATSAPP_API_URL',
+//       data,
+//       {
+//         headers: {
+//           Authorization: `Bearer ${token}`,
+//           'Content-Type': 'application/json'
+//         }
+//       }
+//     );
+//     console.log('✅ Template message sent to owner.');
+//     return response.data;
+//   } catch (err) {
+//     console.error('❌ Template send error:', err.response?.data || err.message);
+//   }
+// }
+
+// async function sendComplaintTemplate(phone, name, vehicleNo, reason, location) {
+//   const data = {
+//     messaging_product: 'whatsapp',
+//     to: phone,
+//     type: 'template',
+//     template: {
+//       name: 'testing_9', // 👈 Your approved template name
+//       language: { code: 'en' },
+//       components: [
+//         {
+//           type: 'body',
+//           parameters: [
+//             { type: 'text', text: name },
+//             { type: 'text', text: vehicleNo },
+//             { type: 'text', text: reason },
+//             { type: 'text', text: location }
+//           ]
+//         },
+//         {
+//   "type": "button",
+//   "sub_type": "flow",
+//   "index": 0,
+//   "parameters": [
+//     {
+//       "type": "flow",
+//       "flow": {
+//         "name": "templates_send_complaint_UTILITY_96c4d"
+//       }
+//     }
+//   ]
+// }
+
+//       ]
+//     }
+//   };
+
+//   try {
+//     const response = await axios.post(
+//       'process.env.WHATSAPP_API_URL',
+//       data,
+//       {
+//         headers: {
+//           Authorization: `Bearer ${token}`,
+//           'Content-Type': 'application/json'
+//         }
+//       }
+//     );
+//     console.log('✅ Template message sent to owner.');
+//     return response.data;
+//   } catch (err) {
+//     console.error('❌ Template send error:', err.response?.data || err.message);
+//   }
+// }
+
 async function sendComplaintTemplate(phone, name, vehicleNo, reason, location) {
   const data = {
     messaging_product: 'whatsapp',
     to: phone,
     type: 'template',
     template: {
-      name: 'send_alert_to_owner',
-      language: {
-        code: 'en'
-      },
+      name: 'send_complaint_4', // ✅ your approved template name
+      language: { code: 'en' },
       components: [
         {
           type: 'body',
           parameters: [
-            { type: 'text', text: name },        // {{1}}
-            { type: 'text', text: vehicleNo },   // {{2}}
-            { type: 'text', text: reason },      // {{3}}
-            { type: 'text', text: location }     // {{4}}
+            { type: 'text', text: name },
+            { type: 'text', text: vehicleNo },
+            { type: 'text', text: reason },
+            { type: 'text', text: location }
           ]
-        }
+        },
+         {
+        "type": "button",
+        "sub_type": "flow",
+        "index": "0",
+        "parameters": [
+          {
+            "type": "action",
+            "action": {
+              "flow_token": "1500471944449330",
+              "flow_action_data": {
+                "complaint_reason": "Blocking gate"
+              }
+            }
+          }
+        ]
+      }
       ]
     }
   };
 
   try {
     const response = await axios.post(
-      process.env.WHATSAPP_API_URL, // e.g., https://graph.facebook.com/v18.0/<phone_number_id>/messages
+      'https://graph.facebook.com/v19.0/693787413814595/messages',
       data,
       {
         headers: {
@@ -1456,12 +1889,57 @@ async function sendComplaintTemplate(phone, name, vehicleNo, reason, location) {
         }
       }
     );
-    console.log('✅ Template message sent to owner.');
+    console.log('✅ Template message sent successfully.');
     return response.data;
   } catch (err) {
     console.error('❌ Template send error:', err.response?.data || err.message);
   }
 }
+
+
+
+
+// async function sendComplaintTemplate(phone, name, vehicleNo, reason, location) {
+//   const data = {
+//     messaging_product: 'whatsapp',
+//     to: phone,
+//     type: 'template',
+//     template: {
+//       name: 'word', // 👈 use your actual template name
+//       language: {
+//         code: 'en'
+//       },
+//       components: [
+//         {
+//           type: 'body',
+//           parameters: [
+//             { type: 'text', text: name },        // {{1}} - Owner's name
+//             { type: 'text', text: vehicleNo },   // {{2}} - Vehicle No
+//             { type: 'text', text: reason },      // {{3}} - Reason
+//             { type: 'text', text: location }     // {{4}} - Location
+//           ]
+//         }
+//       ]
+//     }
+//   };
+
+//   try {
+//     const response = await axios.post(
+//       'process.env.WHATSAPP_API_URL',
+//       data,
+//       {
+//         headers: {
+//           Authorization: `Bearer ${token}`,
+//           'Content-Type': 'application/json'
+//         }
+//       }
+//     );
+//     console.log('✅ Template message sent to owner.');
+//     return response.data;
+//   } catch (err) {
+//     console.error('❌ Template send error:', err.response?.data || err.message);
+//   }
+// }
 
 
 function extractText(msg) {
@@ -1517,29 +1995,34 @@ const tempComplaints = {};
 //   'Other'];
 
 const COMPLAINT_REASONS = [
-  { title: '❗ Wrong Vehicle Parking', description: 'Your Vehicle Wrongly parked' },
-  { title: 'Blocking road', description: 'Your Vehicle jamming the Road' },
-  { title: 'Lights/Siren/Unlocked', description: 'Lights turned on/ vehicle unlocked/siren going on' },
-  { title: 'Challan Issued', description: 'Generating a challan' },
-  { title: 'Towing in Progress', description: 'Towing vehicle, move immediately' },
+  { title: 'Wrong Vehicle Parking', description: 'Vehicle wrongly parked' },
+  { title: 'Blocking road', description: 'Vehicle blocking the road, jamming' },
+  { title: 'Lights/Siren/Unlocked', description: 'Vehicle blocking the driveway' },
+  { title: 'Challan Issued', description: 'Challan being issued ,move vehicle asap.' },
+  {title: 'Near My Shop', description: 'Vehicle before my house/shop'},
+  { title: 'Towing in Progress', description: 'Towing in progress, move vehicle asap' },
   { title: 'Other', description: 'Specify your own reason' }
 ];
 const OWNER_RESPONSE_OPTIONS = [
+    {
+    title: 'Thanks, On It',
+    description: 'Thank you. Will do the needful'
+  },
   {
     title: 'Move in 5–10 mins',
-    description: 'Will move my vehicle in 5–10 minutes.'
+    description: 'Will move vehicle in 5–10 minutes.'
   },
   {
     title: 'On call, wait',
-    description: 'I am held up, will move my vehicle in 15–20 minutes.'
+    description: 'Help up , will move  vehicle in 15–20 minutes.'
   },
   {
     title: 'Unavailable now',
-    description: 'I am unavailable now. Sorry for the inconvenience.'
+    description: 'Very sorry.I am out of station'
   },
   {
-    title: 'Delegate moving',
-    description: 'I have informed someone else to move the vehicle.'
+    title: 'Working on It ASAP',
+    description: 'Have informed will solve asap'
   },
   {
     title: 'Spam/Prank',
@@ -1559,15 +2042,66 @@ exports.handleWebhook = async (req, res) => {
 
   if (tempComplaints[phone]?.stage === 'awaiting_owner_response') {
     const response = extractText(message).trim().toUpperCase();
+    // Extract response as uppercase (from your existing logic)
+// Step 1: Get response JSON string from interactive message
+const responseJsonString = message?.interactive?.nfm_reply?.response_json;
+
+let forwardedReason = '';
+let customMessage = '';
+
+try {
+  const parsed = JSON.parse(responseJsonString);
+
+  const rawForwarded = parsed['screen_0_This_message_will_be_forwarded_0'];
+  const rawCustomMsg = parsed['screen_0_Type_custom_message__1'];
+
+  // ✅ Remove number prefix & all underscores completely
+  if (rawForwarded && typeof rawForwarded === 'string') {
+    forwardedReason = rawForwarded
+      .replace(/^\d+_/, '')   // Remove number prefix like 4_
+      .replace(/_/g, ' ')      // Remove all underscores completely
+      .trim();
+  }
+
+  // ✅ Custom message as-is (just trim)
+  if (rawCustomMsg && typeof rawCustomMsg === 'string') {
+    customMessage = rawCustomMsg.trim();
+  }
+
+} catch (err) {
+  console.error('❌ Failed to parse or extract flow data:', err.message);
+}
+
+// ✅ Final Clean Outputs
+     // Goood
+
     const complainantPhone = tempComplaints[phone].originalComplainant;
 
+// ✅ Final Output
+if (complainantPhone) {
+  // Case 1: Both forwarded reason & custom message exist
+  if (forwardedReason && customMessage) {
+    await sendMessage(
+      complainantPhone,
+      `📩 The vehicle owner responded:\n"${forwardedReason}"\n"${customMessage}"`
+    );
+  }
+  // Case 2: Only forwarded reason exists
+  else if (forwardedReason && !customMessage) {
+    await sendMessage(
+      complainantPhone,
+      `📩 The vehicle owner responded:\n"${forwardedReason}"`
+    );
+  }
+    // const complainantPhone = tempComplaints[phone].originalComplainant;
 
-    if (complainantPhone) {
-      await sendMessage(
-        complainantPhone,
-        `📩 The vehicle owner responded:\n"${response}"`
-      );
-    }
+}
+    // if (complainantPhone) {
+    //   await sendMessage(
+    //     complainantPhone,
+    //     `📩 The vehicle owner responded:\n"${forwardedReason}"`
+    //   );
+    // }
 
     delete tempComplaints[phone];
     return res.sendStatus(200);
@@ -1864,14 +2398,14 @@ exports.handleWebhook = async (req, res) => {
     const existingUser = await Registration.findOne({ phone });
     const vehicleCount = existingUser?.vehicles?.length || 0;
 
-    if (vehicleCount >= 3) {
-      await sendMessage(
-        phone,
-        '❌ You have already registered 3 vehicles. This is the maximum allowed per account.'
-      );
-      delete tempComplaints[phone];
-      return res.sendStatus(200);
-    }
+    // if (vehicleCount >= 3) {
+    //   await sendMessage(
+    //     phone,
+    //     '❌ You have already registered 3 vehicles. This is the maximum allowed per account.'
+    //   );
+    //   delete tempComplaints[phone];
+    //   return res.sendStatus(200);
+    // }
 
     const vehicleExists = await Registration.exists({
       'vehicles.number': text.toUpperCase(),
@@ -1929,13 +2463,13 @@ exports.handleWebhook = async (req, res) => {
           new Date(c.at).getTime() > now - 15 * 60 * 1000
         );
       });
-      if (recentComplaint) {
-        await sendMessage(
-          phone,
-          '❌ You have already submitted a complaint for this vehicle. Please try again after 15 minutes.'
-        );
-        return res.sendStatus(200)
-      }
+      // if (recentComplaint) {
+      //   await sendMessage(
+      //     phone,
+      //     '❌ You have already submitted a complaint for this vehicle. Please try again after 15 minutes.'
+      //   );
+      //   return res.sendStatus(200)
+      // }
       const recentUniqueUsers = new Set(
         complaints
           .filter(c => new Date(c.at).getTime() > now - 15 * 60 * 1000)
@@ -1954,13 +2488,13 @@ exports.handleWebhook = async (req, res) => {
         c.complainedBy === phone &&
         new Date(c.at).getTime() > twentyFourHourLimit
       );
-      if (complaintsInLast24Hrs.length >= 3) {
-        await sendMessage(
-          phone,
-          '❌ You have submitted multiple complaints. Please send the complaint tomorrow.'
-        );
-        return res.sendStatus(200)
-      }
+      // if (complaintsInLast24Hrs.length >= 3) {
+      //   await sendMessage(
+      //     phone,
+      //     '❌ You have submitted multiple complaints. Please send the complaint tomorrow.'
+      //   );
+      //   return res.sendStatus(200)
+      // }
       tempComplaints[phone] = {
         stage: 'awaiting_reason',
         vehicleNumber: text,
@@ -2114,11 +2648,11 @@ async function saveComplaint(phone, vehicleNumber, reason, locationText) {
     );
 
     // Send response options
-    await sendMessage(
-      normalizedOwnerPhone,
-      `Please respond:`,
-      OWNER_RESPONSE_OPTIONS
-    );
+    // await sendMessage(
+    //   normalizedOwnerPhone,
+    //   `Please respond:`,
+    //   OWNER_RESPONSE_OPTIONS
+    // );
   }
 
   // 5. Confirmation message to complainant
