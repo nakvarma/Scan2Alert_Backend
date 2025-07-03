@@ -539,7 +539,7 @@
 // //     return response;
 // //   } catch (err) {
 // //     console.error('❌ WhatsApp API Error:', JSON.stringify(err.response?.data, null, 2));
-// //   }
+// //   }https://2e92-2400-adc5-133-3d00-cd12-8ccb-596f-3076.ngrok-free.app
 // // }
 
 // async function sendLocationRequest(phone) {
@@ -1185,7 +1185,9 @@ require('dotenv').config();
 const axios = require('axios');
 const Registration = require('../models/Registration');
 
-//  const token = "EAATDUOPTCisBO0P2H3ySY2PZA497ZA7OqrZAwmzWlPgh5HQtrgAcuAh1xKJnyayBvigb2GWKM1Bkwm3IdFkx5bZAeiPZBTZByDolsAH5T04myMWzrXXoXmLucXT8ZA8wZCQfkGMLEB7B3dMd2S06ZCpDEYjlv56TimmxOeFLKZApt4D3Nu8dyvooWxQSDFOeLWZAgZDZD"
+//  const url= "https://graph.facebook.com/v22.0/693787413814595/messages"
+
+// const token = "EAATDUOPTCisBO0P2H3ySY2PZA497ZA7OqrZAwmzWlPgh5HQtrgAcuAh1xKJnyayBvigb2GWKM1Bkwm3IdFkx5bZAeiPZBTZByDolsAH5T04myMWzrXXoXmLucXT8ZA8wZCQfkGMLEB7B3dMd2S06ZCpDEYjlv56TimmxOeFLKZApt4D3Nu8dyvooWxQSDFOeLWZAgZDZD"
 const token = process.env.WHATSAPP_TOKEN;
 
 // function sendMessage(phone, text, buttons = []) {
@@ -1217,6 +1219,28 @@ const token = process.env.WHATSAPP_TOKEN;
 //     }
 //   );
 // }
+
+async function sendMediaMessage(phone, mediaPayload) {
+  try {
+    await axios.post(
+      process.env.WHATSAPP_API_URL,
+      {
+        messaging_product: 'whatsapp',
+        to: phone,
+        type: mediaPayload.type,
+        [mediaPayload.type]: mediaPayload[mediaPayload.type],
+      },
+      {
+        headers: {
+ Authorization: `Bearer ${token}`,    
+       'Content-Type': 'application/json',
+        },
+      }
+    );
+  } catch (error) {
+    console.error('Error sending media message:', error?.response?.data || error.message);
+  }
+}
 function sendMessage(phone, text, options = []) {
   const isList = options.length > 3;
 
@@ -1880,7 +1904,7 @@ async function sendComplaintTemplate(phone, name, vehicleNo, reason, location) {
 
   try {
     const response = await axios.post(
-      'https://graph.facebook.com/v19.0/693787413814595/messages',
+      process.env.WHATSAPP_API_URL,
       data,
       {
         headers: {
@@ -2001,7 +2025,7 @@ const COMPLAINT_REASONS = [
   { title: 'Challan Issued', description: 'Challan being issued ,move vehicle asap.' },
   {title: 'Near My Shop', description: 'Vehicle before my house/shop'},
   { title: 'Towing in Progress', description: 'Towing in progress, move vehicle asap' },
-  { title: 'Other', description: 'Specify your own reason' }
+  // { title: 'Other', description: 'Specify your own reason' }
 ];
 const OWNER_RESPONSE_OPTIONS = [
     {
@@ -2155,15 +2179,24 @@ if (complainantPhone) {
       const { latitude, longitude } = message.location;
       locationText = await reverseGeocode(latitude, longitude);
     } else if (message.type === 'text') {
+      // const zip = message.text?.body?.trim();
+      // if (!zip || !/^\d{4,8}$/.test(zip)) {
+      //   await sendMessage(
+      //     phone,
+      //     '❌ Please enter a valid ZIP code (4-8 digits) or share your location.'
+      //   );
+      //   return res.sendStatus(200);
+      // }
       const zip = message.text?.body?.trim();
-      if (!zip || !/^\d{4,8}$/.test(zip)) {
-        await sendMessage(
-          phone,
-          '❌ Please enter a valid ZIP code (4-8 digits) or share your location.'
-        );
-        return res.sendStatus(200);
-      }
-      locationText = `ZIP Code: ${zip}`;
+if (!zip || !/^\d{6}$/.test(zip)) {
+  await sendMessage(
+    phone,
+    '❌ Please enter a valid PIN code (6 digits) or share your location.'
+  );
+  return res.sendStatus(200);
+}
+locationText = `ZIP Code: ${zip}`;
+
     } else {
       await sendMessage(
         phone,
@@ -2204,12 +2237,29 @@ if (complainantPhone) {
         stage: 'awaiting_sticker_response',
         vehicle: vehicle,
       };
+// 1. Send the image
+await sendMediaMessage(phone, {
+  type: 'image',
+  image: {
+    link: 'https://scan2alert.in/api/images/logo.jpg', // 👈 Replace with your actual image URL
+    caption: '📦 Do you have a SCAN2ALERT sticker with you?'
+  }
+});
+await new Promise(resolve => setTimeout(resolve, 1500));
+await sendMessage(phone, 'Please tap an option below 👇', ['YES', 'NO']);
 
-      await sendMessage(
-        phone,
-        '📦 Do you have a physical SCAN2ALERT sticker with you?',
-        ['YES', 'NO']
-      );
+// 2. Send the button message
+// await sendMessage(
+//   phone,
+//   '📦 Do you have a SCAN2ALERT sticker with you?',
+//   ['YES', 'NO']
+// );
+
+      // await sendMessage(
+      //   phone,
+      //   '📦 Do you have a SCAN2ALERT sticker with you?',
+      //   ['YES', 'NO']
+      // );
     } else {
       await saveComplaint(
         phone,

@@ -13,6 +13,8 @@ app.use(cors());
 app.use('/', registration);
 
 app.use('/', webhookRoutes);
+// server.js or app.js
+app.use('/images', express.static('public/images'));
 
 app.get('/', (req, res) => {
   res.send('Server is working fine!');
