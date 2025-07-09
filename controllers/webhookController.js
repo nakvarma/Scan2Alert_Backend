@@ -5,9 +5,7 @@
 require('dotenv').config();
 const axios = require('axios');
 const Registration = require('../models/Registration');
-// const apiKey = "AIzaSyA3ieiayuT-76h-mdwrWc03RdSyywvCj8Q"
 const apiKey = process.env.GOOGLE_MAPS_API_KEY;
-// const url = process.env.WHATSAPP_API_URL || "https://graph.facebook.com/v22.0/693787413814595/messages";
 
 const url = process.env.WHATSAPP_API_URL ;
 const token = process.env.WHATSAPP_TOKEN;
