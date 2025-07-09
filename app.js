@@ -6,16 +6,13 @@ const registration = require('./routes/registrationRoutes');
 const webhookRoutes = require('./routes/webhookRoutes');
 const cors = require('cors');
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 
 app.use(bodyParser.json());
 app.use(cors());
 app.use('/', registration);
-
 app.use('/', webhookRoutes);
-// server.js or app.js
 app.use('/images', express.static('public/images'));
-
 app.get('/', (req, res) => {
   res.send('Server is working fine!');
 });

@@ -47,12 +47,9 @@ exports.getVehicleByNumber = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
-
-
-
 exports.deleteVehicleById = async (req, res) => {
   const { userId, vehicleNumber } = req.params;
-  console.log(userId,vehicleNumber)
+  console.log(userId, vehicleNumber)
   try {
     await Registration.findByIdAndUpdate(userId, {
       $pull: { vehicles: { _id: vehicleNumber } }
