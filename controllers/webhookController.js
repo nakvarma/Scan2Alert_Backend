@@ -531,7 +531,7 @@ console.log(locationText)
 await sendMediaMessage(phone, {
   type: 'image',
   image: {
-    link: 'https://04fbd29ee704.ngrok-free.app/images/logo.jpeg', // 👈 Replace with your actual image URL
+    link: 'https://scan2alert.in/api/images/logo.jpeg', // 👈 Replace with your actual image URL
     caption: '📦 Do you have a SCAN2ALERT sticker with you?'
   }
 });
