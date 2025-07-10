@@ -266,15 +266,36 @@ async function reverseGeocode(latitude, longitude) {
     return `Lat: ${latitude}, Long: ${longitude}`;
   }
 }
+// async function reverseGeocodeFromZip(zip) {
+//   try {
+//     const res = await axios.get(
+//       // `https://maps.googleapis.com/maps/api/geocode/json?address=${zip}&key=${apiKey}`
+//       `https://api.postalpincode.in/pincode/${zip}`
+//     );
+//     const results = res.data.results;
+//     console.log('ZIP Geocoding results:', res);
+//     if (results && results.length > 0) {
+//       return results[0].formatted_address;
+//     }
+//     return `ZIP Code: ${zip}`;
+//   } catch (err) {
+//     console.error('ZIP Geocoding error:', err.message);
+//     return `ZIP Code: ${zip}`;
+//   }
+// }
 async function reverseGeocodeFromZip(zip) {
   try {
-    const res = await axios.get(
-      `https://maps.googleapis.com/maps/api/geocode/json?address=${zip}&key=${apiKey}`
-    );
-    const results = res.data.results;
-    if (results && results.length > 0) {
-      return results[0].formatted_address;
+    const res = await axios.get(`https://api.postalpincode.in/pincode/${zip}`);
+    const data = res.data;
+
+    console.log('ZIP Geocoding results:', data);
+
+    if (data && data[0].Status === "Success" && data[0].PostOffice?.length > 0) {
+      const postOffice = data[0].PostOffice[0];
+      const location = `${postOffice.Name}, ${postOffice.District}, ${postOffice.State}, ${zip}`;
+      return location;
     }
+
     return `ZIP Code: ${zip}`;
   } catch (err) {
     console.error('ZIP Geocoding error:', err.message);
@@ -283,16 +304,25 @@ async function reverseGeocodeFromZip(zip) {
 }
 
 const tempComplaints = {};
-
 const COMPLAINT_REASONS = [
-  { title: 'Wrong Vehicle Parking', description: 'Vehicle wrongly parked' },
-  { title: 'Blocking road', description: 'Vehicle blocking the road, jamming' },
-  { title: 'Lights/Siren/Unlocked', description: 'Vehicle blocking the driveway' },
-  { title: 'Challan Issued', description: 'Challan being issued ,move vehicle asap.' },
-  {title: 'Near My Shop', description: 'Vehicle before my house/shop'},
-  { title: 'Towing in Progress', description: 'Towing in progress, move vehicle asap' },
-  // { title: 'Other', description: 'Specify your own reason' }
+  { title: 'Vehicle Wrongly Parked'},
+  { title: 'Vehicle Blocking Road' },
+  { title: 'Vehicl Blocking Driveway' },
+  { title: 'Unlocked/Siren/Lights on'},
+  {title: 'Vehicle before my Shop'},
+  { title: 'Traffic Challan issued' },
+    { title: 'Vehicle being towed' },
+
 ];
+// const COMPLAINT_REASONS = [
+//   { title: 'Wrong Vehicle Parked', description: 'Vehicle wrongly parked' },
+//   { title: 'Blocking road', description: 'Vehicle blocking the road, jamming' },
+//   { title: 'Lights/Siren/Unlocked', description: 'Vehicle blocking the driveway' },
+//   { title: 'Challan Issued', description: 'Challan being issued ,move vehicle asap.' },
+//   {title: 'Near My Shop', description: 'Vehicle before my house/shop'},
+//   { title: 'Towing in Progress', description: 'Towing in progress, move vehicle asap' },
+//   // { title: 'Other', description: 'Specify your own reason' }
+// ];
 const OWNER_RESPONSE_OPTIONS = [
     {
     title: 'Thanks, On It',
@@ -454,6 +484,7 @@ if (!zip || !/^\d{6}$/.test(zip)) {
 }
 // locationText = `ZIP Code: ${zip}`;
 locationText = await reverseGeocodeFromZip(zip);
+console.log(locationText)
     }
     
     else {
@@ -500,7 +531,7 @@ locationText = await reverseGeocodeFromZip(zip);
 await sendMediaMessage(phone, {
   type: 'image',
   image: {
-    link: 'https://scan2alert.in/api/images/logo.jpg', // 👈 Replace with your actual image URL
+    link: 'https://04fbd29ee704.ngrok-free.app/images/logo.jpeg', // 👈 Replace with your actual image URL
     caption: '📦 Do you have a SCAN2ALERT sticker with you?'
   }
 });
@@ -543,10 +574,10 @@ await sendMessage(phone, 'Please tap an option below 👇', ['YES', 'NO']);
       delete tempComplaints[phone];
     } else if (text === 'no') {
       tempComplaints[phone].stage = 'awaiting_address';
-      await sendMessage(
-        phone,
-        '📍 Please enter your address.\n📦 You’d like Scan2Alert sticker delivered to.'
-      );
+      // await sendMessage(
+      //   phone,
+      //   '📍 Please enter your address.\n📦 You’d like Scan2Alert sticker delivered to.'
+      // );
       await sendAddressRequest(phone);
     } else {
       await sendMessage(
@@ -810,15 +841,9 @@ await sendMessage(phone, 'Please tap an option below 👇', ['YES', 'NO']);
   if (tempComplaints[phone]?.stage === 'awaiting_custom_reason') {
     tempComplaints[phone].reason = text.toUpperCase();
     tempComplaints[phone].stage = 'awaiting_location';
-    // await sendMessage(
-    //   phone,
-    //   '📍 Please *share* the location using the 📎 icon.'
-    // );
+    
     await sendLocationRequest(phone);
-    // await sendMessage(
-    //   phone,
-    //   '📍 Or type your *ZIP code* below if you prefer not to share location.'
-    // );
+    
     return res.sendStatus(200);
   }
 
