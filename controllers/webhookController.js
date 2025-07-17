@@ -604,7 +604,7 @@ await sendMessage(phone, 'Please tap an option below 👇', ['YES', 'NO']);
       const responseData = JSON.parse(message.interactive.nfm_reply.response_json);
       const values = responseData.values || {};
 
-      address = `${values.name || ''}, ${values.address || ''}, ${values.city || ''}, ${values.state || ''}, ${values.in_pin_code || ''}`.toUpperCase();
+      address = `${values.name || ''}, ${values.floor_number || ''},${values.tower_number || ''},${values.landmark_area || ''},${values.address || ''}, ${values.city || ''}, ${values.state || ''}. ${values.in_pin_code || ''}. MOB:${values.phone_number}`.toUpperCase();
     }
     // ✅ Fallback to manually typed address
     else if (message.type === 'text') {
