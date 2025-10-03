@@ -3,7 +3,7 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 dotenv.config();
-mongoose.connect("mongodb://localhost:27017/carRegistration", {
+mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   serverSelectionTimeoutMS: 5000,
