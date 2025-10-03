@@ -5,12 +5,12 @@
 require('dotenv').config();
 const axios = require('axios');
 const Registration = require('../models/Registration');
-const apiKey = process.env.GOOGLE_MAPS_API_KEY;
-
-const url = process.env.WHATSAPP_API_URL ;
-const token = process.env.WHATSAPP_TOKEN;
-
-
+// const apiKey = process.env.GOOGLE_MAPS_API_KEY;
+const apiKey="AIzaSyBtkizM7CrBy5HDT3d8avqZl1nBAVhoHsY";
+// const url = process.env.WHATSAPP_API_URL ;
+// const token = process.env.WHATSAPP_TOKEN;
+const token="EAATDUOPTCisBO0P2H3ySY2PZA497ZA7OqrZAwmzWlPgh5HQtrgAcuAh1xKJnyayBvigb2GWKM1Bkwm3IdFkx5bZAeiPZBTZByDolsAH5T04myMWzrXXoXmLucXT8ZA8wZCQfkGMLEB7B3dMd2S06ZCpDEYjlv56TimmxOeFLKZApt4D3Nu8dyvooWxQSDFOeLWZAgZDZD"
+const url = " https://graph.facebook.com/v22.0/693787413814595/messages"
 
 
 async function sendMediaMessage(phone, mediaPayload) {
@@ -113,7 +113,7 @@ async function sendLocationRequest(phone) {
 
   try {
     await axios.post(
-      url, // replace with your Phone Number ID
+      url, 
       data,
       {
         headers: {
@@ -131,7 +131,7 @@ async function sendAddressRequest(phone) {
   const data = {
     messaging_product: 'whatsapp',
     recipient_type: 'individual',
-    to: phone, // Must be a valid Indian phone number like +91XXXXXXXXXX
+    to: phone, 
     type: 'interactive',
     interactive: {
       type: 'address_message',
@@ -141,7 +141,7 @@ async function sendAddressRequest(phone) {
       action: {
         name: 'address_message',
         parameters: {
-          country: 'IN', // Mandatory
+          country: 'IN', 
           values: {
             name: 'Scan2Alert User', // optional, prefilled name
             phone_number: phone // must match +91 format
@@ -176,7 +176,7 @@ async function sendComplaintTemplate(phone, name, vehicleNo, reason, location) {
     to: phone,
     type: 'template',
     template: {
-      name: 'send_complaint_4', // ✅ your approved template name
+      name: 'send_complaint_4', 
       language: { code: 'en' },
       components: [
         {
@@ -256,6 +256,8 @@ async function reverseGeocode(latitude, longitude) {
 
   try {
     const res = await axios.get(url);
+    console.log(res.data);
+
     const results = res.data.results;
     if (results && results.length > 0) {
       return results[0].formatted_address;
@@ -266,6 +268,11 @@ async function reverseGeocode(latitude, longitude) {
     return `Lat: ${latitude}, Long: ${longitude}`;
   }
 }
+
+
+
+
+
 // async function reverseGeocodeFromZip(zip) {
 //   try {
 //     const res = await axios.get(
@@ -472,6 +479,8 @@ const vehicleNo = tempComplaints[phone]?.vehicle;
     if (message.type === 'location') {
       const { latitude, longitude } = message.location;
       locationText = await reverseGeocode(latitude, longitude);
+      console.log("le",locationText)
+
     } else if (message.type === 'text') {
       
       const zip = message.text?.body?.trim();
@@ -484,7 +493,7 @@ if (!zip || !/^\d{6}$/.test(zip)) {
 }
 // locationText = `ZIP Code: ${zip}`;
 locationText = await reverseGeocodeFromZip(zip);
-console.log(locationText)
+console.log("l2",locationText)
     }
     
     else {
@@ -531,14 +540,16 @@ console.log(locationText)
 await sendMediaMessage(phone, {
   type: 'image',
   image: {
-    link: 'https://scan2alert.in/api/images/logo.jpeg', // 👈 Replace with your actual image URL
+    link: 'https://scan2alert.in/api/images/logo.jpeg', 
     caption: '📦 Do you have a SCAN2ALERT sticker with you?'
   }
 });
 
 await new Promise(resolve => setTimeout(resolve, 1500));
-await sendMessage(phone, 'Please tap an option below 👇', ['YES', 'NO']);
-
+// await sendMessage(phone, 'Please tap an option below 👇', ['YES', 'NO']);
+setTimeout(async () => {
+  await sendMessage(phone, 'Please tap an option below 👇', ['YES', 'NO']);
+}, 2000);
     } else {
       await saveComplaint(
         phone,
