@@ -78,7 +78,7 @@ exports.getAllBarcodes = async (req, res) => {
 };
 exports.deleteBarcode = async (req, res) => {
   try {
-    const { id } = req.params; // barcode _id to delete
+    const { id } = req.params; // barcode _id inside barcodes array
     console.log('Delete request for barcode ID:', id);
 
     // Find which user contains this barcode
@@ -88,6 +88,14 @@ exports.deleteBarcode = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Barcode not found' });
     }
 
+    // Find the barcode value before deleting it
+    const barcodeData = user.barcodes.find(b => b._id.toString() === id);
+    const barcodeValue = barcodeData?.barcode;
+
+    if (!barcodeValue) {
+      return res.status(400).json({ success: false, message: 'Barcode value not found' });
+    }
+
     // Check how many barcodes the user has
     if (user.barcodes.length > 1) {
       // 🔹 Remove only this barcode from the array
@@ -95,24 +103,24 @@ exports.deleteBarcode = async (req, res) => {
         { _id: user._id },
         { $pull: { barcodes: { _id: id } } }
       );
-
-      return res.status(200).json({
-        success: true,
-        message: `Barcode deleted successfully for phone ${user.phone}`,
-        deletedType: 'singleBarcode',
-      });
     } else {
       // 🔹 If only one barcode, delete the entire document
       await BarcodeItem.deleteOne({ _id: user._id });
-
-      return res.status(200).json({
-        success: true,
-        message: `User with phone ${user.phone} deleted because only one barcode existed`,
-        deletedType: 'user',
-      });
     }
+
+    // 🔹 Update the barcode status in Barcode collection
+    await Barcode.updateOne(
+      { barcode: barcodeValue },
+      { $set: { status: false } }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: `Barcode deleted successfully and status updated to false for barcode ${barcodeValue}`,
+    });
   } catch (error) {
     console.error('Error deleting barcode:', error);
     res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 };
+
