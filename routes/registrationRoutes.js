@@ -1,11 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const registrationController = require('../controllers/registrationController');
-
+const generateBarcodes = require('../controllers/generateBarcodesController');
+const exportBarcodesController = require('../controllers/exportBarcodesController');
 router.get('/registrations', registrationController.getAllRegistrations);
 router.get('/registrations/:id', registrationController.getRegistrationById);
 router.delete('/registrations/:id', registrationController.deleteRegistrationById);
 router.get('/registrations/vehicle/:number', registrationController.getVehicleByNumber);
 router.delete('/registrations/:userId/vehicles/:vehicleNumber', registrationController.deleteVehicleById);
-
+router.post('/generate-barcodes', generateBarcodes.generateBarcodes);
+router.get('/export-barcodes', exportBarcodesController.exportBarcodes);
+router.get('/barcodes', generateBarcodes.getAllBarcodes);
+router.delete('/barcodes/:id', generateBarcodes.deleteBarcode);
 module.exports = router;

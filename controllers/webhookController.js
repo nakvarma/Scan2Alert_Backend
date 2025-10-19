@@ -1,15 +1,11 @@
-
-
-
-
 require('dotenv').config();
 const axios = require('axios');
 const Registration = require('../models/Registration');
- const apiKey = process.env.GOOGLE_MAPS_API_KEY;
-// const url = process.env.WHATSAPP_API_URL ;
-// const token = process.env.WHATSAPP_TOKEN;
-const token="EAATDUOPTCisBO0P2H3ySY2PZA497ZA7OqrZAwmzWlPgh5HQtrgAcuAh1xKJnyayBvigb2GWKM1Bkwm3IdFkx5bZAeiPZBTZByDolsAH5T04myMWzrXXoXmLucXT8ZA8wZCQfkGMLEB7B3dMd2S06ZCpDEYjlv56TimmxOeFLKZApt4D3Nu8dyvooWxQSDFOeLWZAgZDZD"
-const url = " https://graph.facebook.com/v22.0/693787413814595/messages"
+const apiKey = process.env.GOOGLE_MAPS_API_KEY;
+const url = process.env.WHATSAPP_API_URL ;
+const token = process.env.WHATSAPP_TOKEN;
+// const token = "EAATDUOPTCisBO0P2H3ySY2PZA497ZA7OqrZAwmzWlPgh5HQtrgAcuAh1xKJnyayBvigb2GWKM1Bkwm3IdFkx5bZAeiPZBTZByDolsAH5T04myMWzrXXoXmLucXT8ZA8wZCQfkGMLEB7B3dMd2S06ZCpDEYjlv56TimmxOeFLKZApt4D3Nu8dyvooWxQSDFOeLWZAgZDZD"
+// const url = " https://graph.facebook.com/v22.0/693787413814595/messages"
 
 
 async function sendMediaMessage(phone, mediaPayload) {
@@ -24,8 +20,8 @@ async function sendMediaMessage(phone, mediaPayload) {
       },
       {
         headers: {
- Authorization: `Bearer ${token}`,    
-       'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
         },
       }
     );
@@ -112,7 +108,7 @@ async function sendLocationRequest(phone) {
 
   try {
     await axios.post(
-      url, 
+      url,
       data,
       {
         headers: {
@@ -130,7 +126,7 @@ async function sendAddressRequest(phone) {
   const data = {
     messaging_product: 'whatsapp',
     recipient_type: 'individual',
-    to: phone, 
+    to: phone,
     type: 'interactive',
     interactive: {
       type: 'address_message',
@@ -140,10 +136,10 @@ async function sendAddressRequest(phone) {
       action: {
         name: 'address_message',
         parameters: {
-          country: 'IN', 
+          country: 'IN',
           values: {
-            name: 'Scan2Alert User', // optional, prefilled name
-            phone_number: phone // must match +91 format
+            name: 'Scan2Alert User',
+            phone_number: phone
           }
         }
       }
@@ -152,7 +148,7 @@ async function sendAddressRequest(phone) {
 
   try {
     const res = await axios.post(
-     url, // example: https://graph.facebook.com/v15.0/PHONE_NUMBER_ID/messages
+      url,
       data,
       {
         headers: {
@@ -175,7 +171,7 @@ async function sendComplaintTemplate(phone, name, vehicleNo, reason, location) {
     to: phone,
     type: 'template',
     template: {
-      name: 'send_complaint_4', 
+      name: 'send_complaint_4',
       language: { code: 'en' },
       components: [
         {
@@ -187,22 +183,22 @@ async function sendComplaintTemplate(phone, name, vehicleNo, reason, location) {
             { type: 'text', text: location }
           ]
         },
-         {
-        "type": "button",
-        "sub_type": "flow",
-        "index": "0",
-        "parameters": [
-          {
-            "type": "action",
-            "action": {
-              "flow_token": "1500471944449330",
-              "flow_action_data": {
-                "complaint_reason": "Blocking gate"
+        {
+          "type": "button",
+          "sub_type": "flow",
+          "index": "0",
+          "parameters": [
+            {
+              "type": "action",
+              "action": {
+                "flow_token": "1500471944449330",
+                "flow_action_data": {
+                  "complaint_reason": "Blocking gate"
+                }
               }
             }
-          }
-        ]
-      }
+          ]
+        }
       ]
     }
   };
@@ -250,7 +246,7 @@ function extractText(msg) {
 
 
 async function reverseGeocode(latitude, longitude) {
-  
+
   const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${apiKey}`;
 
   try {
@@ -268,27 +264,6 @@ async function reverseGeocode(latitude, longitude) {
   }
 }
 
-
-
-
-
-// async function reverseGeocodeFromZip(zip) {
-//   try {
-//     const res = await axios.get(
-//       // `https://maps.googleapis.com/maps/api/geocode/json?address=${zip}&key=${apiKey}`
-//       `https://api.postalpincode.in/pincode/${zip}`
-//     );
-//     const results = res.data.results;
-//     console.log('ZIP Geocoding results:', res);
-//     if (results && results.length > 0) {
-//       return results[0].formatted_address;
-//     }
-//     return `ZIP Code: ${zip}`;
-//   } catch (err) {
-//     console.error('ZIP Geocoding error:', err.message);
-//     return `ZIP Code: ${zip}`;
-//   }
-// }
 async function reverseGeocodeFromZip(zip) {
   try {
     const res = await axios.get(`https://api.postalpincode.in/pincode/${zip}`);
@@ -311,26 +286,18 @@ async function reverseGeocodeFromZip(zip) {
 
 const tempComplaints = {};
 const COMPLAINT_REASONS = [
-  { title: 'Vehicle Wrongly Parked'},
+  { title: 'Vehicle Wrongly Parked' },
   { title: 'Vehicle Blocking Road' },
   { title: 'Vehicl Blocking Driveway' },
-  { title: 'Unlocked/Siren/Lights on'},
-  {title: 'Vehicle before my Shop'},
+  { title: 'Unlocked/Siren/Lights on' },
+  { title: 'Vehicle before my Shop' },
   { title: 'Traffic Challan issued' },
-    { title: 'Vehicle being towed' },
+  { title: 'Vehicle being towed' },
 
 ];
-// const COMPLAINT_REASONS = [
-//   { title: 'Wrong Vehicle Parked', description: 'Vehicle wrongly parked' },
-//   { title: 'Blocking road', description: 'Vehicle blocking the road, jamming' },
-//   { title: 'Lights/Siren/Unlocked', description: 'Vehicle blocking the driveway' },
-//   { title: 'Challan Issued', description: 'Challan being issued ,move vehicle asap.' },
-//   {title: 'Near My Shop', description: 'Vehicle before my house/shop'},
-//   { title: 'Towing in Progress', description: 'Towing in progress, move vehicle asap' },
-//   // { title: 'Other', description: 'Specify your own reason' }
-// ];
+
 const OWNER_RESPONSE_OPTIONS = [
-    {
+  {
     title: 'Thanks, On It',
     description: 'Thank you. Will do the needful'
   },
@@ -362,114 +329,77 @@ exports.handleWebhook = async (req, res) => {
   const message = entry?.changes?.[0]?.value?.messages?.[0];
   if (!message) return res.sendStatus(200);
 
-  // const phone = message.from;
   const phone = message.from.replace(/\D/g, '').replace(/^0/, '92').trim();
 
 
   if (tempComplaints[phone]?.stage === 'awaiting_owner_response') {
     const response = extractText(message).trim().toUpperCase();
-    // Extract response as uppercase (from your existing logic)
-// Step 1: Get response JSON string from interactive message
-const responseJsonString = message?.interactive?.nfm_reply?.response_json;
 
-let forwardedReason = '';
-let customMessage = '';
+    const responseJsonString = message?.interactive?.nfm_reply?.response_json;
 
-try {
-  const parsed = JSON.parse(responseJsonString);
+    let forwardedReason = '';
+    let customMessage = '';
 
-  const rawForwarded = parsed['screen_0_This_message_will_be_forwarded_0'];
-  const rawCustomMsg = parsed['screen_0_Type_custom_message__1'];
+    try {
+      const parsed = JSON.parse(responseJsonString);
 
-  // ✅ Remove number prefix & all underscores completely
-  if (rawForwarded && typeof rawForwarded === 'string') {
-    forwardedReason = rawForwarded
-      .replace(/^\d+_/, '')   // Remove number prefix like 4_
-      .replace(/_/g, ' ')      // Remove all underscores completely
-      .trim();
-  }
+      const rawForwarded = parsed['screen_0_This_message_will_be_forwarded_0'];
+      const rawCustomMsg = parsed['screen_0_Type_custom_message__1'];
 
-  // ✅ Custom message as-is (just trim)
-  if (rawCustomMsg && typeof rawCustomMsg === 'string') {
-    customMessage = rawCustomMsg.trim();
-  }
+      if (rawForwarded && typeof rawForwarded === 'string') {
+        forwardedReason = rawForwarded
+          .replace(/^\d+_/, '')
+          .replace(/_/g, ' ')
+          .trim();
+      }
 
-} catch (err) {
-  console.error('❌ Failed to parse or extract flow data:', err.message);
-}
+      if (rawCustomMsg && typeof rawCustomMsg === 'string') {
+        customMessage = rawCustomMsg.trim();
+      }
 
-// ✅ Final Clean Outputs
-     // Goood
+    } catch (err) {
+      console.error('❌ Failed to parse or extract flow data:', err.message);
+    }
 
     const complainantPhone = tempComplaints[phone].originalComplainant;
-
-// ✅ Final Output
-// if (complainantPhone) {
-//   // Case 1: Both forwarded reason & custom message exist
-//   if (forwardedReason && customMessage) {
-//     await sendMessage(
-//       complainantPhone,
-//       `📩 The vehicle owner responded:\n"${forwardedReason}"\n"${customMessage}"`
-//     );
-//   }
-//   // Case 2: Only forwarded reason exists
-//   else if (forwardedReason && !customMessage) {
-//     await sendMessage(
-//       complainantPhone,
-//       `📩 The vehicle owner responded:\n"${forwardedReason}"`
-//     );
-//   }
-//     // const complainantPhone = tempComplaints[phone].originalComplainant;
-
-// }
-if (complainantPhone) {
-  // Send to complainant
-  if (forwardedReason && customMessage) {
-    await sendMessage(
-      complainantPhone,
-      `📩 The vehicle owner responded:\n"${forwardedReason}"\n"${customMessage}"`
-    );
-  } else if (forwardedReason && !customMessage) {
-    await sendMessage(
-      complainantPhone,
-      `📩 The vehicle owner responded:\n"${forwardedReason}"`
-    );
-  }
-const vehicleNo = tempComplaints[phone]?.vehicle;
-  // ✅ Save owner reply in vehicle document
-  console.log('Saving owner reply for vehicle:', vehicleNo, 'to complainant:', complainantPhone, 'with reason:', forwardedReason, 'and custom message:', customMessage);
- await Registration.updateOne(
-  { 'vehicles.number': vehicleNo, 'vehicles.complaints.complainedBy': complainantPhone },
-  {
-    $set: {
-      'vehicles.$[].complaints.$[c].reply': {
-        message: forwardedReason,
-        custom: customMessage,
-        at: new Date()
+    if (complainantPhone) {
+      if (forwardedReason && customMessage) {
+        await sendMessage(
+          complainantPhone,
+          `📩 The vehicle owner responded:\n"${forwardedReason}"\n"${customMessage}"`
+        );
+      } else if (forwardedReason && !customMessage) {
+        await sendMessage(
+          complainantPhone,
+          `📩 The vehicle owner responded:\n"${forwardedReason}"`
+        );
       }
+      const vehicleNo = tempComplaints[phone]?.vehicle;
+      console.log('Saving owner reply for vehicle:', vehicleNo, 'to complainant:', complainantPhone, 'with reason:', forwardedReason, 'and custom message:', customMessage);
+      await Registration.updateOne(
+        { 'vehicles.number': vehicleNo, 'vehicles.complaints.complainedBy': complainantPhone },
+        {
+          $set: {
+            'vehicles.$[].complaints.$[c].reply': {
+              message: forwardedReason,
+              custom: customMessage,
+              at: new Date()
+            }
+          }
+        },
+        {
+          arrayFilters: [
+            { 'c.complainedBy': complainantPhone }
+          ]
+        }
+      );
+
     }
-  },
-  {
-    arrayFilters: [
-      { 'c.complainedBy': complainantPhone }
-    ]
-  }
-);
-
-}
-
-    // if (complainantPhone) {
-    //   await sendMessage(
-    //     complainantPhone,
-    //     `📩 The vehicle owner responded:\n"${forwardedReason}"`
-    //   );
-    // }
-
     delete tempComplaints[phone];
     return res.sendStatus(200);
   }
 
-  
+
 
   if (tempComplaints[phone]?.stage === 'awaiting_location') {
     const session = tempComplaints[phone];
@@ -478,23 +408,22 @@ const vehicleNo = tempComplaints[phone]?.vehicle;
     if (message.type === 'location') {
       const { latitude, longitude } = message.location;
       locationText = await reverseGeocode(latitude, longitude);
-      console.log("le",locationText)
+      console.log("le", locationText)
 
     } else if (message.type === 'text') {
-      
+
       const zip = message.text?.body?.trim();
-if (!zip || !/^\d{6}$/.test(zip)) {
-  await sendMessage(
-    phone,
-    '❌ Please enter a valid PIN code (6 digits) or share your location.'
-  );
-  return res.sendStatus(200);
-}
-// locationText = `ZIP Code: ${zip}`;
-locationText = await reverseGeocodeFromZip(zip);
-console.log("l2",locationText)
+      if (!zip || !/^\d{6}$/.test(zip)) {
+        await sendMessage(
+          phone,
+          '❌ Please enter a valid PIN code (6 digits) or share your location.'
+        );
+        return res.sendStatus(200);
+      }
+      locationText = await reverseGeocodeFromZip(zip);
+      console.log("l2", locationText)
     }
-    
+
     else {
       await sendMessage(
         phone,
@@ -506,7 +435,6 @@ console.log("l2",locationText)
     if (session.isRegistering) {
       const { name: userName, vehicle } = session;
 
-      // ✅ Proceed to save new vehicle
       await Registration.findOneAndUpdate(
         { phone },
         {
@@ -517,7 +445,7 @@ console.log("l2",locationText)
               location: locationText,
               dispatchAddress: '',
               complaints: [],
-              registeredAt: new Date()  // optional: timestamp for later fix
+              registeredAt: new Date()
             },
           },
         },
@@ -535,20 +463,18 @@ console.log("l2",locationText)
         stage: 'awaiting_sticker_response',
         vehicle: vehicle,
       };
-// 1. Send the image
-await sendMediaMessage(phone, {
-  type: 'image',
-  image: {
-    link: 'https://scan2alert.in/api/images/logo.jpeg', 
-    caption: '📦 Do you have a SCAN2ALERT sticker with you?'
-  }
-});
+      await sendMediaMessage(phone, {
+        type: 'image',
+        image: {
+          link: 'https://scan2alert.in/api/images/logo.jpeg',
+          caption: '📦 Do you have a SCAN2ALERT sticker with you?'
+        }
+      });
 
-await new Promise(resolve => setTimeout(resolve, 1500));
-// await sendMessage(phone, 'Please tap an option below 👇', ['YES', 'NO']);
-setTimeout(async () => {
-  await sendMessage(phone, 'Please tap an option below 👇', ['YES', 'NO']);
-}, 2000);
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      setTimeout(async () => {
+        await sendMessage(phone, 'Please tap an option below 👇', ['YES', 'NO']);
+      }, 2000);
     } else {
       await saveComplaint(
         phone,
@@ -584,10 +510,7 @@ setTimeout(async () => {
       delete tempComplaints[phone];
     } else if (text === 'no') {
       tempComplaints[phone].stage = 'awaiting_address';
-      // await sendMessage(
-      //   phone,
-      //   '📍 Please enter your address.\n📦 You’d like Scan2Alert sticker delivered to.'
-      // );
+
       await sendAddressRequest(phone);
     } else {
       await sendMessage(
@@ -598,14 +521,13 @@ setTimeout(async () => {
     return res.sendStatus(200);
   }
 
- 
+
 
   if (tempComplaints[phone]?.stage === 'awaiting_address') {
     const session = tempComplaints[phone];
     const vehicle = session?.vehicle;
     let address = '';
 
-    // ✅ Handle structured WhatsApp address
     if (
       message.type === 'interactive' &&
       message.interactive?.type === 'nfm_reply' &&
@@ -616,17 +538,14 @@ setTimeout(async () => {
 
       address = `${values.name || ''}, ${values.floor_number || ''},${values.tower_number || ''},${values.landmark_area || ''},${values.address || ''}, ${values.city || ''}, ${values.state || ''}. ${values.in_pin_code || ''}. MOB:${values.phone_number}`.toUpperCase();
     }
-    // ✅ Fallback to manually typed address
     else if (message.type === 'text') {
       address = text.toUpperCase();
     }
-    // ❌ Invalid format
     else {
       await sendMessage(phone, '❌ Please provide your address using the address form or type it manually.');
       return res.sendStatus(200);
     }
 
-    // ✅ Save to database
     await Registration.updateOne(
       { 'vehicles.number': vehicle.toUpperCase() },
       {
@@ -645,12 +564,11 @@ setTimeout(async () => {
 
 
 
- 
+
   if (text === 'register') {
     const existingUser = await Registration.findOne({ phone });
 
     if (existingUser) {
-      // ✅ User already exists — skip name, prompt for vehicle
       await sendMessage(
         phone,
         'You’re already registered.\nPlease enter your Vehicle Number.'
@@ -662,7 +580,6 @@ setTimeout(async () => {
         name: existingUser.name,
       };
     } else {
-      // 🆕 New user — ask for name
       await sendMessage(phone, 'Please enter your name:');
       tempComplaints[phone] = {
         stage: 'awaiting_name',
@@ -702,11 +619,6 @@ setTimeout(async () => {
       return res.sendStatus(200);
     }
 
-    //     if (/^\s|\s$/.test(text) || /[^a-zA-Z0-9]/.test(text)) {
-    //   await sendMessage(phone, 'Please enter number without space or special characters.');
-    //   return res.sendStatus(200);
-    // }
-
     const existingUser = await Registration.findOne({ phone });
     const vehicleCount = existingUser?.vehicles?.length || 0;
 
@@ -733,16 +645,8 @@ setTimeout(async () => {
 
     tempComplaints[phone].vehicle = text.toUpperCase();
     tempComplaints[phone].stage = 'awaiting_location';
-    // await sendMessage(
-    //   phone,
-    //   '📍 Please *share* your live location using the 📎 (attachment) icon in WhatsApp.'
-    // );
     await sendLocationRequest(phone);
 
-    // await sendMessage(
-    //   phone,
-    //   '📍 Or type your *ZIP code* below if you prefer not to share location.'
-    // );
     return res.sendStatus(200);
   }
 
@@ -756,11 +660,9 @@ setTimeout(async () => {
     return res.sendStatus(200);
   }
 
-  
-  if (tempComplaints[phone]?.stage === 'awaiting_vehicle') {  
-    // const vehicleExists = await Registration.exists({
-    //   'vehicles.number': text.toUpperCase(),
-    // });
+
+  if (tempComplaints[phone]?.stage === 'awaiting_vehicle') {
+
     const vehicleExists = await Registration.findOne(
       { 'vehicles.number': text.toUpperCase() },
       { 'vehicles.$': 1 }
@@ -793,7 +695,7 @@ setTimeout(async () => {
           '❌ You have already submitted a complaint for this vehicle. Please try again after 15 minutes.'
         );
         return res.sendStatus(200)
-      } 
+      }
 
       const twentyFourHourLimit = now - 24 * 60 * 60 * 1000;
       const complaintsInLast24Hrs = complaints.filter(c =>
@@ -834,16 +736,10 @@ setTimeout(async () => {
     } else {
       tempComplaints[phone].reason = text.toUpperCase();
       tempComplaints[phone].stage = 'awaiting_location';
-      // await sendMessage(
-      //   phone,
-      //   '📍 Please *share* your live location using the 📎 (attachment) icon in WhatsApp.'
-      // );
+
       await sendLocationRequest(phone);
 
-      // await sendMessage(
-      //   phone,
-      //   '📍 Or type your *ZIP code* below if you prefer not to share location.'
-      // );
+
     }
     return res.sendStatus(200);
   }
@@ -851,9 +747,9 @@ setTimeout(async () => {
   if (tempComplaints[phone]?.stage === 'awaiting_custom_reason') {
     tempComplaints[phone].reason = text.toUpperCase();
     tempComplaints[phone].stage = 'awaiting_location';
-    
+
     await sendLocationRequest(phone);
-    
+
     return res.sendStatus(200);
   }
 
@@ -865,7 +761,6 @@ setTimeout(async () => {
 
 async function saveComplaint(phone, vehicleNumber, reason, locationText) {
   const vehicleNO = vehicleNumber.toUpperCase();
-  // 3. Save complaint with timestamp
   await Registration.updateOne(
     { 'vehicles.number': vehicleNO },
     {
@@ -881,27 +776,23 @@ async function saveComplaint(phone, vehicleNumber, reason, locationText) {
     }
   );
 
-  // 4. Fetch owner for notification
   const owner = await Registration.findOne({
     'vehicles.number': vehicleNO
   });
 
   if (owner) {
-    // Normalize owner's phone to 92xxxxxxxxxx
     let rawPhone = owner.phone;
     if (!rawPhone.startsWith('92')) {
       rawPhone = rawPhone.replace(/^0/, '92');
     }
     const normalizedOwnerPhone = rawPhone.replace(/\D/g, '').trim();
 
-    // Track temp session for response
     tempComplaints[normalizedOwnerPhone] = {
       stage: 'awaiting_owner_response',
       originalComplainant: phone,
       vehicle: vehicleNO
     };
 
-    // Send template message to owner
     await sendComplaintTemplate(
       normalizedOwnerPhone,
       owner.name || 'Owner',
@@ -910,15 +801,7 @@ async function saveComplaint(phone, vehicleNumber, reason, locationText) {
       locationText
     );
 
-    // Send response options
-    // await sendMessage(
-    //   normalizedOwnerPhone,
-    //   `Please respond:`,
-    //   OWNER_RESPONSE_OPTIONS
-    // );
   }
-
-  // 5. Confirmation message to complainant
   await sendMessage(
     phone,
     ` We have forwarded the issue you are facing to the vehicle owner.\n\n` +
@@ -927,7 +810,6 @@ async function saveComplaint(phone, vehicleNumber, reason, locationText) {
     ` Scan2Alert is free for all. If you wish to register your vehicle with us, please send “Hi”.`
   );
 
-  // 6. Clear temp session
   delete tempComplaints[phone];
 }
 
@@ -944,6 +826,25 @@ exports.getWebhook = (req, res) => {
     res.sendStatus(403);
   }
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
