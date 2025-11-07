@@ -4,8 +4,9 @@ const BarcodeItem = require('../models/BarcodeItem');
 
 // const token = "EAATDUOPTCisBO0P2H3ySY2PZA497ZA7OqrZAwmzWlPgh5HQtrgAcuAh1xKJnyayBvigb2GWKM1Bkwm3IdFkx5bZAeiPZBTZByDolsAH5T04myMWzrXXoXmLucXT8ZA8wZCQfkGMLEB7B3dMd2S06ZCpDEYjlv56TimmxOeFLKZApt4D3Nu8dyvooWxQSDFOeLWZAgZDZD";
 // const url = 'https://graph.facebook.com/v22.0/830078310189900/messages';
-const url=process.env.WHATSAPP_API_URL;
-const token=process.env.WHATSAPP_API_TOKEN;
+const url=process.env.WHATSAPP_API2_URL;
+const token=process.env.WHATSAPP_TOKEN;
+
 const tempSession = {};
 
 async function sendFoundItemTemplate(phone, itemName, tag) {
