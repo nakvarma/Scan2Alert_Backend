@@ -1,13 +1,3 @@
-// const mongoose = require('mongoose');
-
-// const barcodeSchema = new mongoose.Schema({
-//   barcode: { type: String, required: true, unique: true },
-//   itemName: { type: String },
-//   phone: { type: String },
-//   registeredAt: { type: Date, default: Date.now },
-// });
-
-// module.exports = mongoose.model('BarcodeItem', barcodeSchema);
 const mongoose = require('mongoose');
 
 const barcodeSchema = new mongoose.Schema({
@@ -15,7 +5,7 @@ const barcodeSchema = new mongoose.Schema({
   barcodes: [
     {
       barcode: { type: String, required: true },
-      itemName: { type: String },
+      itemName: { type: String , default: 'item'},
       registeredAt: { type: Date, default: Date.now }
     }
   ]

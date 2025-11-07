@@ -2,8 +2,8 @@ const Barcode = require('../models/Barcode');
 const BarcodeItem = require('../models/BarcodeItem');
 
 function generateRandomBarcode() {
-  const letters = 'ABCDEFGHJKMNPQRSTUVWXYZ'; // capital letters
-  const numbers = '23456789'; // digits without 0,1
+  const letters = 'ABCDEFGHJKMNPQRSTUVWXYZ'; 
+  const numbers = '23456789'; 
   const allChars = letters + numbers;
 
   let code = '';
@@ -14,14 +14,12 @@ function generateRandomBarcode() {
       code += allChars.charAt(Math.floor(Math.random() * allChars.length));
     }
 
-    // ✅ ensure at least 1 letter and 1 number
     if (/[A-Z]/.test(code) && /\d/.test(code)) break;
   }
 
   return code;
 }
 
-// Generate unique barcodes and save them to DB
 async function generateUniqueBarcodes(count = 50) {
   const generated = new Set();
   const maxAttempts = count * 30;
@@ -49,7 +47,6 @@ async function generateUniqueBarcodes(count = 50) {
   return inserted;
 }
 
-// Controller handler
 exports.generateBarcodes = async (req, res) => {
   const count = Math.max(1, Math.min(500, parseInt(req.body.count) || 50));
 
@@ -69,7 +66,7 @@ exports.generateBarcodes = async (req, res) => {
 
 exports.getAllBarcodes = async (req, res) => {
   try {
-    const barcodes = await BarcodeItem.find().sort({ registeredAt: -1 }); // latest first
+    const barcodes = await BarcodeItem.find().sort({ registeredAt: -1 }); 
     res.status(200).json(barcodes);
   } catch (err) {
     console.error('Error fetching barcodes:', err);
@@ -78,17 +75,16 @@ exports.getAllBarcodes = async (req, res) => {
 };
 exports.deleteBarcode = async (req, res) => {
   try {
-    const { id } = req.params; // barcode _id inside barcodes array
+    const { id } = req.params; 
     console.log('Delete request for barcode ID:', id);
 
-    // Find which user contains this barcode
+    
     const user = await BarcodeItem.findOne({ 'barcodes._id': id });
 
     if (!user) {
       return res.status(404).json({ success: false, message: 'Barcode not found' });
     }
 
-    // Find the barcode value before deleting it
     const barcodeData = user.barcodes.find(b => b._id.toString() === id);
     const barcodeValue = barcodeData?.barcode;
 
@@ -96,19 +92,15 @@ exports.deleteBarcode = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Barcode value not found' });
     }
 
-    // Check how many barcodes the user has
     if (user.barcodes.length > 1) {
-      // 🔹 Remove only this barcode from the array
       await BarcodeItem.updateOne(
         { _id: user._id },
         { $pull: { barcodes: { _id: id } } }
       );
     } else {
-      // 🔹 If only one barcode, delete the entire document
       await BarcodeItem.deleteOne({ _id: user._id });
     }
 
-    // 🔹 Update the barcode status in Barcode collection
     await Barcode.updateOne(
       { barcode: barcodeValue },
       { $set: { status: false } }
